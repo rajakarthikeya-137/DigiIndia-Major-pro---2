@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>My Tickets | MahaLakshmi</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+  :root {
+    --primary: #0d9488;
+    --secondary: #6366f1;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background: #0f172a;
+    color: #e5e7eb;
+  }
+
+  /* Background Video */
+  #bg-video {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -3;
+    filter: brightness(0.55);
+  }
+
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: -2;
+  }
+
+  /* Navbar (copied from Login page) */
+  .navbar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    padding: 12px 22px;
+    background: linear-gradient(90deg, #0f766e, #4f46e5, #f97316);
+    background-size: 200% 200%;
+    animation: navMove 14s ease-in-out infinite;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 10;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.75);
+  }
+
+  @keyframes navMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  .nav-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #f9fafb;
+    font-weight: bold;
+    font-size: 18px;
+  }
+
+  .home-btn {
+    padding: 7px 14px;
+    background: rgba(15,23,42,0.2);
+    border: 1px solid rgba(248,250,252,0.7);
+    border-radius: 999px;
+    color: #f9fafb;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    backdrop-filter: blur(6px);
+    transition: 0.15s ease;
+  }
+
+  .home-btn:hover {
+    background: #f9fafb;
+    color: #0f172a;
+  }
+
+  /* Page container */
+  .container {
+    max-width: 900px;
+    margin: 120px auto 40px auto;
+    padding: 20px;
+  }
+
+  h1 {
+    text-align: center;
+    color: #38bdf8;
+    margin-bottom: 20px;
+  }
+
+  /* Ticket card */
+  .ticket {
+    background: rgba(15,23,42,0.9);
+    border: 1px solid #38bdf8;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 14px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  }
+
+  .ticket p { margin: 4px 0; font-size: 14px; }
+  .ticket b { color: #fbbf24; }
+
+  .route-btn {
+    margin-top: 10px;
+    padding: 9px 14px;
+    background: #38bdf8;
+    color: #0f172a;
+    border-radius: 8px;
+    cursor: pointer;
+    border: none;
+    font-weight: bold;
+  }
+
+  .route-btn:hover {
+    background: #0ea5e9;
+  }
+
+  .no-tickets {
+    text-align: center;
+    color: #f87171;
+    margin-top: 40px;
+    font-size: 18px;
+  }
+
+  .back-btn {
+    display: block;
+    margin: 20px auto;
+    padding: 8px 16px;
+    border-radius: 10px;
+    border: 1px solid #38bdf8;
+    background: rgba(56,189,248,0.1);
+    color: #38bdf8;
+    cursor: pointer;
+  }
+</style>
+
+<script src="/js/auth.js"></script>
+</head>
+
+<body>
+
+<!-- Background video -->
+<video id="bg-video" autoplay muted loop>
+  <source src="/videos/hyd.mp4" type="video/mp4">
+</video>
+<div class="overlay"></div>
+
+<!-- NAVBAR -->
+<div class="navbar">
+  <div class="nav-left">
+    <button class="home-btn" onclick="location.href='/index.html'">🏠 Home</button>
+    <span>My Ticket History</span>
+  </div>
+</div>
+
+<div class="container">
+  <h1>My Tickets</h1>
+
+  <div id="ticketsList"></div>
+
+  <button class="back-btn" onclick="location.href='/index.html'">⬅ Back to Home</button>
+</div>
+
+<script>
+async function loadTickets() {
+  const token = localStorage.getItem("token");
+  const box = document.getElementById("ticketsList");
+
+  if (!token) {
+    box.innerHTML = "<p class='no-tickets'>Please login to view your tickets.</p>";
+    return;
+  }
+
+  let data;
+
+  try {
+    data = await auth.apiCall("/tickets/my", "GET", null, true);
+  } catch (err) {
+    box.innerHTML = "<p class='no-tickets'>Unable to load tickets.</p>";
+    return;
+  }
+
+  if (!data || !data.tickets || data.tickets.length === 0) {
+    box.innerHTML = "<p class='no-tickets'>No tickets booked yet.</p>";
+    return;
+  }
+
+  let html = "";
+  data.tickets.forEach(t => {
+    html += `
+      <div class="ticket">
+        <p><b>Ticket ID:</b> ${t._id}</p>
+        <p><b>Bus Number:</b> ${t.busNo}</p>
+        <p><b>Journey Date:</b> ${t.journeyDate}</p>
+        <p><b>From:</b> ${t.source}</p>
+        <p><b>To:</b> ${t.destination}</p>
+        <p><b>Payment:</b> ${t.paymentType} (₹${t.amount})</p>
+
+        <button class="route-btn" 
+          onclick="location.href='route.html?source=${encodeURIComponent(t.source)}&destination=${encodeURIComponent(t.destination)}&busNo=${t.busNo}'">
+          🗺 View Route
+        </button>
+      </div>
+    `;
+  });
+
+  box.innerHTML = html;
+}
+
+loadTickets();
+</script>
+
+</body>
+</html>

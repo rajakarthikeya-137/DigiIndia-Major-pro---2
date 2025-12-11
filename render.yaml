@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: ticketing-system
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: MONGO_URI
+        sync: false
+    runtime: "node18"

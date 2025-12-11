@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>TSRTC Free Bus Pass Verification</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script src="/js/auth.js"></script>
+
+    <style>
+        * { box-sizing: border-box; }
+
+        :root {
+            --primary: #0d9488;
+            --secondary: #6366f1;
+            --card-bg: rgba(15,23,42,0.96);
+            --radius-lg: 18px;
+            --shadow-strong: 0 20px 45px rgba(0,0,0,0.8);
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            background: #000;
+            color: #e5e7eb;
+            overflow-x: hidden;
+        }
+
+        /* Background Video */
+        .video-bg {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100vh;
+            object-fit: cover;
+            filter: brightness(0.55) blur(2px);
+            transform: scale(1.03);
+            z-index: -2;
+        }
+
+        .video-overlay {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at top, rgba(255,255,255,0.07), transparent 55%),
+                        linear-gradient(to bottom, rgba(15,23,42,0.55), rgba(15,23,42,0.9));
+            z-index: -1;
+        }
+
+        /* Navbar */
+        .navbar {
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding: 12px 22px;
+            background: linear-gradient(90deg, #0f766e, #4f46e5, #f97316);
+            background-size: 200% 200%;
+            animation: navMove 12s linear infinite;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+            z-index: 10;
+        }
+
+        @keyframes navMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .nav-left { display: flex; align-items: center; gap: 10px; }
+
+        .home-btn {
+            padding: 7px 14px;
+            background: rgba(15,23,42,0.2);
+            border: 1px solid rgba(248,250,252,0.7);
+            border-radius: 999px;
+            color: #f9fafb;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            backdrop-filter: blur(6px);
+            transition: 0.15s ease;
+        }
+
+        .home-btn:hover {
+            background: #f9fafb;
+            color: #0f172a;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(15,23,42,0.9);
+        }
+
+        .nav-title {
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            text-transform: uppercase;
+        }
+
+        /* Buttons */
+        .dropdown-btn,
+        .profile-btn,
+        .logout-btn,
+        .admin-panel-btn {
+            padding: 7px 14px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.28);
+            border: 1px solid rgba(255,255,255,0.5);
+            color: white;
+            cursor: pointer;
+        }
+
+        /* Dropdown */
+        .dropdown { position: relative; display: inline-block; }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            min-width: 150px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+        }
+        .dropdown:hover .dropdown-content { display: block; }
+        .dropdown-content a {
+            padding: 10px; display: block; text-decoration: none; color: black; font-size: 14px;
+        }
+
+        /* Verification Card */
+        .verify-wrapper {
+            margin-top: 110px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .verify-card {
+            width: 500px;
+            padding: 22px;
+            border-radius: 18px;
+            background: rgba(15,23,42,0.96);
+            box-shadow: var(--shadow-strong);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(148,163,184,0.32);
+        }
+
+        .verify-card::before {
+            content: "";
+            position: absolute;
+            inset: -2px;
+            border-radius: inherit;
+            background: conic-gradient(from 180deg,
+                rgba(56,189,248,0.7),
+                rgba(129,140,248,0.9),
+                rgba(249,115,22,0.9),
+                rgba(56,189,248,0.7));
+            animation: spin 10s linear infinite;
+            z-index: -1;
+        }
+
+        .verify-card::after {
+            content: "";
+            position: absolute;
+            inset: 2px;
+            border-radius: inherit;
+            background: rgba(15,23,42,0.96);
+            z-index: -1;
+        }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        .header {
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            margin-bottom: 12px;
+        }
+
+        .header img { height: 70px; }
+
+        .form-box label { color: #e5e7eb; font-size: 14px; }
+
+        .form-box input[type=text] {
+            width: 240px;
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.3);
+            background: rgba(15,23,42,0.9);
+            color: white;
+        }
+
+        .captcha-box {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 12px 0;
+        }
+        /* OTP Button Styled Same As Navbar Buttons */
+.otp-btn {
+    padding: 7px 14px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.28);
+    border: 1px solid rgba(255,255,255,0.5);
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.15s ease;
+    backdrop-filter: blur(6px);
+}
+
+.otp-btn:hover {
+    background: #f9fafb;
+    color: #0f172a;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(15,23,42,0.9);
+}
+
+        .submit-btn {
+            width: 100%;
+            padding: 10px;
+            border-radius: 999px;
+            background: linear-gradient(120deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: bold;
+        }
+
+        .msg { text-align: center; margin-top: 10px; color: red; }
+    </style>
+</head>
+
+<body>
+
+    <!-- Background Video -->
+    <video class="video-bg" autoplay muted loop playsinline>
+        <source src="/videos/hyd.mp4" type="video/mp4">
+    </video>
+
+    <div class="video-overlay"></div>
+
+    <!-- Navbar -->
+    <div class="navbar">
+        <div class="nav-left">
+            <button class="home-btn" onclick="location.href='/index.html'">🏠 Home</button>
+            <span class="nav-title">MahaLakshmi Portal</span>
+        </div>
+
+        <div class="nav-right">
+            <div class="dropdown" id="loginDropdown">
+                <button class="dropdown-btn">Login ▼</button>
+                <div class="dropdown-content">
+                    <a href="/login.html">User Login</a>
+                    <a href="/admin/login.html">Admin Login</a>
+                </div>
+            </div>
+
+            <div class="dropdown" id="registerDropdown">
+                <button class="dropdown-btn">Register ▼</button>
+                <div class="dropdown-content">
+                    <a href="/register.html">User Register</a>
+                    <a href="/admin/register.html">Admin Register</a>
+                </div>
+            </div>
+
+            <button class="profile-btn" id="profileBtn" style="display:none;">My Profile</button>
+            <button class="admin-panel-btn" id="adminPanelBtn" style="display:none;">Admin Panel</button>
+            <button class="logout-btn" id="logoutBtn" style="display:none;">Logout</button>
+        </div>
+    </div>
+
+    <!-- Verification Card -->
+    <div class="verify-wrapper">
+        <div class="verify-card">
+
+            <div class="header">
+                <img src="logo.png">
+                <h2>TSRTC</h2>
+                <h3>FREE BUS PASS VERIFICATION</h3>
+            </div>
+
+            <div class="form-box">
+
+                <label>Phone Number *</label>
+                <input type="text" id="phone" placeholder="Enter 10-digit phone"><br><br>
+
+                <!-- OTP SECTION -->
+                <div class="captcha-box">
+                    <button class="otp-btn" onclick="sendOTP()">Send OTP</button>
+                </div>
+
+                <input type="text" id="otpInput" placeholder="Enter OTP" style="margin-left: 105px;"><br><br>
+
+                <button class="submit-btn" onclick="verifyForm()">Check</button>
+
+                <p id="msg" class="msg"></p>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- JS -->
+    <script src="/js/auth.js"></script>
+
+<script>
+/* ----------------------------
+      OTP SYSTEM
+---------------------------- */
+let generatedOTP = null;
+
+function sendOTP() {
+    const phone = document.getElementById("phone").value.trim();
+    const msg = document.getElementById("msg");
+
+    if (!/^[0-9]{10}$/.test(phone)) {
+        msg.style.color = "red";
+        msg.textContent = "❌ Invalid phone number";
+        return;
+    }
+
+    generatedOTP = Math.floor(100000 + Math.random() * 900000);
+    alert("Your OTP is: " + generatedOTP);
+
+    msg.style.color = "lime";
+    msg.textContent = "✔️ OTP sent!";
+}
+
+/* -----------------------------------
+      UPDATED verifyForm()
+----------------------------------- */
+async function verifyForm() {
+    const phone = document.getElementById("phone").value.trim();
+    const otpInput = document.getElementById("otpInput").value.trim();
+    const msg = document.getElementById("msg");
+
+    msg.style.color = "red";
+
+    if (!/^[0-9]{10}$/.test(phone)) {
+        msg.textContent = "❌ Invalid phone number";
+        return;
+    }
+
+    if (!generatedOTP) {
+        msg.textContent = "❌ Please click 'Send OTP' first";
+        return;
+    }
+
+    if (otpInput != generatedOTP) {
+        msg.textContent = "❌ Incorrect OTP";
+        return;
+    }
+
+    msg.style.color = "lime";
+    msg.textContent = "✔️ OTP verified! Checking application…";
+
+    try {
+        const res = await fetch(`/verify/${phone}`);
+        const data = await res.json();
+
+        if (!data.success) {
+            msg.textContent = "❌ No application found for this number";
+            return;
+        }
+
+        const appRes =
+            await fetch(`/applicant/${data.id}`);
+        const appData = await appRes.json();
+
+        if (!appData.success || !appData.applicant) {
+            msg.textContent =
+                "⚠️ Something went wrong (ID invalid)";
+            return;
+        }
+
+        const ap = appData.applicant;
+
+        if (ap.status === "APPROVED") {
+            msg.style.color = "lime";
+            msg.innerHTML =
+                "✅ Application Approved! Redirecting…";
+            setTimeout(() => {
+                window.location.href =
+                    `pass.html?id=${ap._id}`;
+            }, 1200);
+            return;
+        }
+
+        if (ap.status === "PENDING") {
+            msg.style.color = "orange";
+            msg.innerHTML =
+                "🟡 Your Application is <b>PENDING</b>.";
+            return;
+        }
+
+        if (ap.status === "REJECTED") {
+            msg.style.color = "red";
+            msg.innerHTML =
+                `❌ <b>Rejected</b><br>Reason: ${ap.statusNote || "No reason given"}`;
+            return;
+        }
+
+        msg.textContent =
+            "⚠️ Unknown status: " + (ap.status || "NONE");
+
+    } catch (e) {
+        msg.textContent = "⚠️ Server error";
+    }
+}
+
+
+/* NAVBAR AUTH */
+const loginDropdown = document.getElementById("loginDropdown");
+const registerDropdown = document.getElementById("registerDropdown");
+const profileBtn = document.getElementById("profileBtn");
+const adminPanelBtn = document.getElementById("adminPanelBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+
+logoutBtn.onclick = () => {
+    auth.clearToken();
+    location.href = "/index.html";
+};
+
+async function setupVerifyNavbar() {
+    const role = await auth.getRole();
+    if (!role) return;
+
+    loginDropdown.style.display = "none";
+    registerDropdown.style.display = "none";
+
+    if (role === "user") {
+        profileBtn.style.display = "inline-block";
+        logoutBtn.style.display = "inline-block";
+    }
+
+    if (role === "admin") {
+        adminPanelBtn.style.display = "inline-block";
+        logoutBtn.style.display = "inline-block";
+        adminPanelBtn.onclick =
+            () => location.href = "/admin/dashboard.html";
+    }
+}
+
+setupVerifyNavbar();
+
+profileBtn.onclick = () => {
+    location.href = "/index.html#profileBox";
+};
+</script>
+
+</body>
+</html>

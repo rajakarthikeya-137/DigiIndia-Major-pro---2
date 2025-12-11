@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>MahaLakshmi Card Portal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --primary: #0d9488;
+      --secondary: #6366f1;
+      --accent: #f97316;
+    }
+
+    /* 🔥 VIDEO BACKGROUND */
+    #bg-video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -2;
+    }
+
+    /* DARK OVERLAY */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+      z-index: -1;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      min-height: 100vh;
+      color: #e5e7eb;
+    }
+
+    /* NAVBAR */
+    .navbar {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      padding: 12px 24px;
+      background: linear-gradient(90deg, #0f766e, #4f46e5, #f97316);
+      background-size: 200% 200%;
+      animation: navMove 14s ease-in-out infinite;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+    }
+
+    @keyframes navMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #f9fafb;
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .home-btn {
+      padding: 7px 14px;
+      background: rgba(15,23,42,0.2);
+      border: 1px solid rgba(248,250,252,0.7);
+      border-radius: 999px;
+      color: #f9fafb;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      backdrop-filter: blur(6px);
+      transition: 0.15s ease;
+    }
+
+    .home-btn:hover {
+      background: #f9fafb;
+      color: #0f172a;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(15,23,42,0.9);
+    }
+
+    .nav-title {
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-shadow: 0 1px 4px rgba(15,23,42,0.8);
+    }
+
+    .nav-buttons button {
+      margin-left: 8px;
+      padding: 7px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(248,250,252,0.7);
+      background: rgba(15,23,42,0.2);
+      color: #f9fafb;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      backdrop-filter: blur(6px);
+      transition: 0.15s ease;
+    }
+
+    .nav-buttons button:hover {
+      background: #f9fafb;
+      color: #0f172a;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(15,23,42,0.8);
+    }
+
+    /* CONTENT */
+    .content {
+      position: relative;
+      z-index: 1;
+      padding: 140px 8% 40px;
+      text-align: center;
+    }
+
+    .page-title {
+      font-size: 2.4rem;
+      font-weight: 800;
+      color: #f9fafb;
+      margin-bottom: 10px;
+      text-shadow: 0 4px 16px rgba(0,0,0,0.8);
+    }
+
+    .description {
+      font-size: 1.05rem;
+      color: #d1d5db;
+      max-width: 650px;
+      margin: 0 auto 24px;
+    }
+
+    /* PROFILE */
+    #profileBox {
+      display: none;
+      margin: 25px auto;
+      max-width: 700px;
+      background: rgba(15,23,42,0.85);
+      border-radius: 18px;
+      padding: 18px 20px;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.7);
+      border: 1px solid rgba(148,163,184,0.35);
+      text-align: left;
+    }
+
+    #profileBox h3 {
+      color: #f97316;
+      margin-bottom: 8px;
+      font-size: 18px;
+    }
+
+    #profileBox p {
+      margin: 4px 0;
+      color: #e5e7eb;
+      font-size: 14px;
+    }
+
+    .button-container {
+      display: none;
+      justify-content: center;
+      gap: 18px;
+      margin-top: 25px;
+      flex-wrap: wrap;
+    }
+
+    .action-btn {
+      padding: 11px 24px;
+      border-radius: 999px;
+      border: none;
+      background: linear-gradient(120deg, var(--primary), var(--secondary));
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      min-width: 200px;
+      box-shadow: 0 14px 30px rgba(15,23,42,0.8);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      transition: 0.18s ease;
+    }
+
+    .action-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 18px 40px rgba(15,23,42,0.9);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- 🔥 BACKGROUND -->
+  <video id="bg-video" autoplay muted loop>
+    <source src="/videos/hyd.mp4" type="video/mp4">
+  </video>
+
+  <div class="overlay"></div>
+
+  <!-- NAVBAR -->
+  <div class="navbar">
+    <div class="nav-left">
+      <button class="home-btn" onclick="location.href='/index.html'">🏠 Home</button>
+      <span class="nav-title">MahaLakshmi Portal</span>
+    </div>
+
+    <div class="nav-buttons">
+
+      <!-- ✅ ADDED SOS BUTTON (ONLY CHANGE HERE) -->
+      <button id="sosBtn" style="display:none; background:#dc2626; border:none; color:white; font-weight:600; border-radius:999px;">
+        🔥 SOS
+      </button>
+
+      <button onclick="location.href='/users/livebus.html'">Live Bus Tracking</button>
+      <button onclick="location.href='/users/mytickets.html'">My Tickets</button>
+
+      <button id="loginBtn" onclick="location.href='/login.html'">Login</button>
+      <button id="registerBtn" onclick="location.href='/register.html'">Register</button>
+
+      <button id="adminLoginBtn" onclick="location.href='/admin/login.html'">Admin Login</button>
+      <button id="adminRegisterBtn" onclick="location.href='/admin/register.html'">Admin Register</button>
+
+      <button id="adminDashBtn" style="display:none;" onclick="location.href='/admin/dashboard.html'">Admin Dashboard</button>
+      <button id="profileBtn" style="display:none;" onclick="scrollToProfile()">My Profile</button>
+      <button id="logoutBtn" style="display:none;">Logout</button>
+
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="content">
+    <h1 class="page-title">MahaLakshmi Smart QR Travel Pass</h1>
+    <p class="description">
+      Digital QR-based free bus travel pass for women in Telangana.
+      Apply online, get verified, and download your TSRTC travel pass in minutes.
+    </p>
+
+    <div id="profileBox">
+      <h3>My Profile</h3>
+      <p><b>Name:</b> <span id="pName"></span></p>
+      <p><b>Email:</b> <span id="pEmail"></span></p>
+    </div>
+
+    <div id="buttonContainer" class="button-container">
+      <button class="action-btn" onclick="location.href='/verify.html'">Download / View Bus Pass</button>
+      <button class="action-btn" id="applyBtn">Start New Application</button>
+    </div>
+  </div>
+
+  <script src="/js/auth.js"></script>
+  <script>
+    const loginBtn = document.getElementById("loginBtn");
+    const registerBtn = document.getElementById("registerBtn");
+    const adminLoginBtn = document.getElementById("adminLoginBtn");
+    const adminRegisterBtn = document.getElementById("adminRegisterBtn");
+    const adminDashBtn = document.getElementById("adminDashBtn");
+    const profileBtn = document.getElementById("profileBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    logoutBtn.onclick = () => {
+      auth.clearToken();
+      location.href = "/index.html";
+    };
+
+    async function setupRoleNavbar() {
+      const role = await auth.getRole();
+      if (!role) return;
+
+      if (role === "user") {
+        adminLoginBtn.style.display = "none";
+        adminRegisterBtn.style.display = "none";
+        loginBtn.style.display = "none";
+        registerBtn.style.display = "none";
+        profileBtn.style.display = "inline-block";
+        logoutBtn.style.display = "inline-block";
+
+        // SHOW SOS BUTTON FOR LOGGED-IN USERS
+        document.getElementById("sosBtn").style.display = "inline-block";
+      }
+
+      if (role === "admin") {
+        loginBtn.style.display = "none";
+        registerBtn.style.display = "none";
+        adminLoginBtn.style.display = "none";
+        adminRegisterBtn.style.display = "none";
+        adminDashBtn.style.display = "inline-block";
+        logoutBtn.style.display = "inline-block";
+      }
+    }
+
+    async function setupUserDashboard() {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      try {
+        const data = await auth.apiCall("/auth/me", "GET", null, true);
+        const user = data.user;
+
+        document.getElementById("pName").textContent = user.name;
+        document.getElementById("pEmail").textContent = user.email;
+
+        document.getElementById("profileBox").style.display = "block";
+        document.getElementById("buttonContainer").style.display = "flex";
+
+        document.getElementById("applyBtn").onclick =
+          () => location.href = "/apply";
+      } catch {
+        auth.clearToken();
+      }
+    }
+
+    function scrollToProfile() {
+      document.getElementById("profileBox")
+        .scrollIntoView({ behavior: "smooth" });
+    }
+
+    setupRoleNavbar();
+    setupUserDashboard();
+  </script>
+
+  <!-- ✅ SOS POPUP (NO STYLE CHANGES) -->
+  <div id="sosPopup" style="
+    display:none; position:fixed; inset:0;
+    background:rgba(0,0,0,0.85); z-index:9999;
+    justify-content:center; align-items:center;">
+    <div style="
+      background:#1e293b; padding:20px; border-radius:12px;
+      width:90%; max-width:350px; color:white;">
+
+      <h3 style="margin-bottom:10px;">Emergency Reason</h3>
+
+      <select id="sosReason" style="width:100%; padding:8px; margin-bottom:10px;">
+        <option value="Contact Police">Contact Police</option>
+        <option value="Rash Driving">Rash Driving</option>
+        <option value="Driver is Drunk">Driver is Drunk</option>
+        <option value="Harassment / Misbehaving">Harassment / Misbehaving</option>
+        <option value="Other">Other</option>
+      </select>
+
+      <textarea id="sosOther" placeholder="Enter details…" 
+        style="width:100%; height:70px; display:none; margin-bottom:10px;"></textarea>
+
+      <button onclick="sendSOS()" style="
+        width:100%; background:#dc2626; border:none;
+        padding:10px; color:white; border-radius:8px; margin-bottom:8px;">
+        Send Alert
+      </button>
+
+      <button onclick="closeSOS()" style="
+        width:100%; background:#475569; border:none;
+        padding:10px; color:white; border-radius:8px;">
+        Cancel
+      </button>
+
+    </div>
+  </div>
+
+  <!-- SOS SCRIPT -->
+  <script>
+    const sosBtn = document.getElementById("sosBtn");
+    const sosPopup = document.getElementById("sosPopup");
+    const sosReason = document.getElementById("sosReason");
+    const sosOther = document.getElementById("sosOther");
+
+    sosBtn.onclick = () => {
+      sosPopup.style.display = "flex";
+    };
+
+    function closeSOS() {
+      sosPopup.style.display = "none";
+      sosOther.style.display = "none";
+    }
+
+    sosReason.onchange = () => {
+      if (sosReason.value === "Other") {
+        sosOther.style.display = "block";
+      } else {
+        sosOther.style.display = "none";
+      }
+    };
+
+    function sendSOS() {
+      const reason = sosReason.value;
+      const details = sosOther.value.trim();
+
+      const loc = JSON.parse(localStorage.getItem("userLocation") || "{}");
+      const lat = loc.lat || "Not Available";
+      const lon = loc.lon || "Not Available";
+
+      let msg = `🚨 SOS Alert!\nReason: ${reason}`;
+
+      if (reason === "Other" && details !== "") {
+        msg += `\nDetails: ${details}`;
+      }
+
+      msg += `\n\nLocation:\nLatitude: ${lat}\nLongitude: ${lon}`;
+
+      alert(msg);
+      closeSOS();
+    }
+  </script>
+
+</body>
+</html>

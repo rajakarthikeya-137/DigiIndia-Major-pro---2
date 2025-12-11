@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mahalakshmi Travel Pass</title>
+
+  <!-- AUTH -->
+  <script src="/js/auth.js"></script>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    :root {
+      --primary: #0d9488;
+      --secondary: #6366f1;
+      --accent: #f97316;
+      --card-bg: rgba(15,23,42,0.96);
+      --shadow-strong: 0 20px 45px rgba(0,0,0,0.8);
+    }
+
+    /* 🔥 VIDEO BACKGROUND */
+    .video-bg {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100vh;
+      object-fit: cover;
+      filter: brightness(0.55) blur(2px);
+      transform: scale(1.03);
+      z-index: -2;
+    }
+
+    /* ❌ DARK OVERLAY REMOVED */
+    .video-overlay {
+      display: none !important;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      min-height: 100vh;
+      color: #e5e7eb;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px;
+    }
+
+    /* NAVBAR */
+    .navbar {
+      width: 100%;
+      position: fixed;
+      top: 0;
+      left: 0;
+      padding: 12px 24px;
+      background: linear-gradient(90deg, #0f766e, #4f46e5, #f97316);
+      background-size: 200% 200%;
+      animation: navMove 14s ease-in-out infinite;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 999;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.75);
+    }
+
+    @keyframes navMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #f9fafb;
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .home-btn {
+      padding: 7px 14px;
+      background: rgba(15,23,42,0.2);
+      border: 1px solid rgba(248,250,252,0.7);
+      border-radius: 999px;
+      color: #f9fafb;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      backdrop-filter: blur(6px);
+      transition: 0.15s ease;
+    }
+
+    .home-btn:hover {
+      background: #f9fafb;
+      color: #0f172a;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(15,23,42,0.9);
+    }
+
+    .nav-title {
+      font-size: 18px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-shadow: 0 1px 4px rgba(15,23,42,0.8);
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .profile-btn,
+    .logout-btn,
+    .admin-panel-btn {
+      padding: 7px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(248,250,252,0.7);
+      background: rgba(15,23,42,0.2);
+      color: #f9fafb;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      backdrop-filter: blur(6px);
+      transition: 0.15s ease;
+    }
+
+    .logout-btn {
+      border-color: rgba(248,113,113,0.9);
+    }
+
+    /* CARD COLORS */
+    .card {
+      width: 650px;
+      height: 380px;
+      border-radius: 26px;
+      position: relative;
+      overflow: hidden;
+      padding: 24px 28px;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.28);
+      background: linear-gradient(
+        135deg,
+        #bfe4ff 0%,
+        #d5f1ff 30%,
+        #fdf1c7 70%,
+        #ffe3b0 100%
+      );
+    }
+
+    #frontCard {
+      background: linear-gradient(
+        135deg,
+        #c6ebff 0%,
+        #dbf6ff 35%,
+        #fff4d4 80%,
+        #ffe7b7 100%
+      );
+    }
+
+    .card-container {
+      margin-top: 120px;
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 10px;
+      color: #000;
+      border-bottom: 1px solid rgba(0,0,0,0.3);
+      padding-bottom: 6px;
+    }
+
+    .heading-logo { width: 40px; height: 40px; }
+    .heading-text h2 { font-size: 16px; margin: 0; font-weight: bold; color:#000; }
+    .heading-text .pass-title { font-size: 13px; margin: 0; font-weight: bold; color:#000; }
+
+    .photo-info {
+      display: flex; gap: 15px; margin-top: 70px; align-items: flex-start;
+      color:#000;
+    }
+
+    .photo {
+      width: 2.6cm; height: 2.6cm;
+      background: #000;
+      border-radius: 6px;
+      object-fit: cover;
+      border: 1px solid rgba(0,0,0,0.5);
+    }
+
+    .details { flex: 1; font-size: 14px; line-height: 1.2; color:#000; }
+    .details p { margin: 3px 0; }
+
+    .details-row { display: flex; justify-content: space-between; gap: 6px; }
+
+    .qr {
+      position: absolute; bottom: 80px; right: 40px;
+      width: 80px; height: 80px; background: #fff; border: 2px solid #000;
+    }
+
+    .valid-till {
+      position: absolute; bottom: 20px; right: 40px;
+      font-size: 12px; font-weight: bold;
+      color: #000;
+    }
+
+    .watermark {
+      position: absolute; top: 50%; left: 50%;
+      width: 280px; height: 280px;
+      background: url('logo.png') no-repeat center;
+      background-size: contain; opacity: 0.15;
+      transform: translate(-50%, -50%); pointer-events: none;
+    }
+
+    .front-watermark { background: url('back_logo.png') no-repeat center; }
+
+    .text-center { text-align: center; font-size: 13px; color: #000; }
+
+    .info {
+      position: absolute; bottom: 30px; left: 20px; font-size: 13px; color: #000;
+    }
+
+    .footer { position: absolute; bottom: 10px; left: 20px; font-size: 12px; font-weight: bold; color: #000; }
+
+    .actions { margin-top: 20px; text-align: center; }
+    .btn {
+      background: #007bff; color: #fff; border: none;
+      padding: 14px 28px; font-size: 16px; border-radius: 8px;
+      margin: 10px; cursor: pointer;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.6);
+    }
+    .btn:hover { background: #0056b3; }
+    .note { font-size: 12px; margin-top: 5px; color: #e5e7eb; }
+  </style>
+</head>
+
+<body>
+
+<video class="video-bg" autoplay muted loop playsinline>
+  <source src="/videos/hyd.mp4" type="video/mp4">
+</video>
+<div class="video-overlay"></div>
+
+<!-- NAVBAR -->
+<div class="navbar">
+  <div class="nav-left">
+    <button class="home-btn" onclick="location.href='/index.html'">🏠 Home</button>
+    <span class="nav-title">MahaLakshmi Portal</span>
+  </div>
+
+  <div class="nav-right">
+
+    <!-- ❌ REMOVED LOGIN DROPDOWN -->
+    <!-- ❌ REMOVED REGISTER DROPDOWN -->
+
+    <button class="profile-btn" id="profileBtn" style="display:none;">My Profile</button>
+    <button class="admin-panel-btn" id="adminPanelBtn" style="display:none;">Admin Panel</button>
+    <button class="logout-btn" id="logoutBtn" style="display:none;">Logout</button>
+
+  </div>
+</div>
+
+<!-- PASS CARDS -->
+<div class="card-container">
+  
+  <!-- BACK SIDE -->
+  <div class="card" id="backCard">
+    <div class="header">
+      <img src="logo.png" alt="Logo" class="heading-logo" />
+      <div class="heading-text">
+        <h2>GOVERNMENT OF TELANGANA</h2>
+        <h3 class="pass-title">Mahalakshmi Free Bus Travel Pass</h3>
+      </div>
+    </div>
+    <div class="photo-info">
+      <img id="photo" class="photo" alt="Applicant Photo" />
+      <div class="details">
+        <div class="details-row">
+          <p><b>Name:</b> <span id="name">XXXX</span></p>
+          <p><b>Pass ID:</b> <span id="passId">TSRTC-XXXXXXXX</span></p>
+        </div>
+        <p><b>Aadhaar ID:</b> <span id="aadhar">XXXX</span></p>
+        <p><b>Phone:</b> <span id="phone">XXXX</span></p>
+        <p><b>DOB:</b> <span id="dob">XXXX</span></p>
+        <p><b>Zone:</b> <span id="district">XXXX</span></p>
+      </div>
+    </div>
+    <canvas id="qr" class="qr"></canvas>
+    <div class="valid-till">Valid Till: 31-Dec-2028</div>
+    <div class="watermark"></div>
+  </div>
+
+  <!-- FRONT SIDE -->
+  <div class="card" id="frontCard">
+    <p class="text-center">
+      <b>
+        This pass is valid only for women passengers under the Mahalakshmi Free Travel Scheme.<br />
+        Non-transferable. Misuse will lead to cancellation.
+      </b>
+    </p>
+
+    <div class="info">
+      <p>
+        24x7 Toll-Free Helpline: 1800-9999-000<br />
+        Women Safety Helpline (She Teams): 100 / 1091<br />
+        TSRTC Customer Care: +91-40-00000000
+      </p>
+    </div>
+
+    <div class="footer">Safe Travel, Free Travel – Telangana Govt. Mahalakshmi Scheme</div>
+    <div class="watermark front-watermark"></div>
+  </div>
+</div>
+
+<div class="actions">
+  <button id="printBtn" class="btn">Print Pass</button>
+  <button id="downloadPdfBtn" class="btn">Download PDF</button>
+  <div class="note">(You can print the card or download as PDF for verification.)</div>
+</div>
+
+<!-- LIBS FOR QR + PDF -->
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+// Extract applicant ID (already used)
+async function loadApplicant() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const id = urlParams.get("id");
+  if (!id) return alert("❌ No applicant ID provided");
+
+  const res = await fetch(`/applicant/${id}`);
+  const data = await res.json();
+  if (!data.success) return alert("❌ Applicant not found");
+
+  const a = data.applicant;
+
+  document.getElementById("name").textContent = a.name;
+  document.getElementById("aadhar").textContent = a.aadhar;
+  document.getElementById("phone").textContent = a.whatsapp || a.phone;
+  document.getElementById("dob").textContent = a.dob;
+  document.getElementById("district").textContent = a.district;
+  document.getElementById("passId").textContent = a.passId;
+
+  if (a.photo) {
+    let photoPath = a.photo.startsWith("/") ? a.photo : `/${a.photo}`;
+    document.getElementById("photo").src = photoPath;
+  }
+
+  QRCode.toCanvas(document.getElementById("qr"), a.passId, { width: 120 });
+}
+
+document.getElementById("printBtn").onclick = () => window.print();
+loadApplicant();
+</script>
+
+<!-- ⭐ REPLACE YOUR OLD PDF SCRIPT WITH THIS ⭐ -->
+<script>
+document.getElementById("downloadPdfBtn").onclick = async () => {
+
+  // Capture the pass card container
+  const cardContainer = document.querySelector(".card-container");
+
+  if (!cardContainer) {
+    alert("❌ Could not find card container!");
+    return;
+  }
+
+  // Convert to canvas
+  const canvas = await html2canvas(cardContainer, { scale: 3 });
+  const imgData = canvas.toDataURL("image/png");
+
+  // Create PDF
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF("p", "mm", "a4");
+
+  const pdfWidth = pdf.internal.pageSize.getWidth();
+  const pdfHeight = pdf.internal.pageSize.getHeight();
+
+  // Fit image inside PDF page
+  const imgProps = pdf.getImageProperties(imgData);
+  const imgRatio = imgProps.width / imgProps.height;
+  let finalWidth = pdfWidth - 20;
+  let finalHeight = finalWidth / imgRatio;
+
+  if (finalHeight > pdfHeight - 20) {
+    finalHeight = pdfHeight - 20;
+    finalWidth = finalHeight * imgRatio;
+  }
+
+  pdf.addImage(imgData, "PNG", 10, 10, finalWidth, finalHeight);
+
+  // Download PDF
+  pdf.save("Mahalakshmi_Pass.pdf");
+};
+</script>
+
+</body>
+</html>

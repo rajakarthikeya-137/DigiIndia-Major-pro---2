@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Mahalakshmi Free Bus Scheme Application</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- AUTH -->
+  <script src="/js/auth.js"></script>
+  <script>
+    auth.requireLogin();
+  </script>
+
+  <style>
+    * { box-sizing: border-box; }
+    :root {
+      --primary: #0d9488;
+      --secondary: #6366f1;
+      --accent: #f97316;
+      --card-bg: rgba(15, 23, 42, 0.92);
+      --card-inner: rgba(15, 23, 42, 0.96);
+      --radius-lg: 20px;
+      --shadow-strong: 0 22px 45px rgba(15, 23, 42, 0.85);
+      --border-subtle: rgba(148, 163, 184, 0.35);
+    }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      min-height: 100vh;
+      color: #e5e7eb;
+      background: #020617;
+      overflow-x: hidden;
+    }
+    .video-bg {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100vh;
+      object-fit: cover;
+      filter: brightness(0.55) blur(2px);
+      transform: scale(1.03);
+      z-index: -2;
+    }
+    .video-overlay {
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(circle at top, rgba(56, 189, 248, 0.16), transparent 55%),
+        linear-gradient(to bottom, rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.96));
+      z-index: -1;
+      background-size: 140% 140%, 100% 100%;
+      animation: overlayDrift 24s ease-in-out infinite;
+    }
+    @keyframes overlayDrift {
+      0% { background-position: 0% 0%, 0% 0%; }
+      50% { background-position: 25% 30%, 0% 40%; }
+      100% { background-position: 0% 0%, 0% 0%; }
+    }
+    .navbar {
+      width: 100%;
+      position: fixed;
+      top: 0;
+      left: 0;
+      padding: 10px 22px;
+      background: linear-gradient(90deg, #0f766e, #4f46e5, #f97316);
+      background-size: 200% 200%;
+      animation: navMove 14s ease-in-out infinite;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.85);
+      border-bottom: 1px solid rgba(248, 250, 252, 0.2);
+    }
+    @keyframes navMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .nav-left { display: flex; align-items: center; gap: 10px; }
+    .home-btn {
+      padding: 7px 14px;
+      background: rgba(15,23,42,0.2);
+      border: 1px solid rgba(248,250,252,0.7);
+      border-radius: 999px;
+      color: #f9fafb;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      backdrop-filter: blur(6px);
+      transition: 0.15s ease;
+    }
+    .home-btn:hover {
+      background: #f9fafb;
+      color: #0f172a;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(15,23,42,0.9);
+    }
+    .nav-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #f9fafb;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      text-shadow: 0 1px 4px rgba(15, 23, 42, 0.9);
+    }
+    .nav-right { display: flex; align-items: center; gap: 8px; }
+    .dropdown-btn,
+    .profile-btn,
+    .logout-btn,
+    .admin-panel-btn {
+      padding: 7px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(248, 250, 252, 0.6);
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 13px;
+      background: rgba(15, 23, 42, 0.35);
+      color: #f9fafb;
+      backdrop-filter: blur(8px);
+      transition: background-color 0.15s ease,color 0.15s ease,transform 0.15s ease,box-shadow 0.15s ease,border-color 0.15s ease;
+    }
+    .dropdown-btn:hover,
+    .profile-btn:hover,
+    .logout-btn:hover,
+    .admin-panel-btn:hover {
+      background: #f9fafb;
+      color: #0f172a;
+      border-color: rgba(209, 213, 219, 0.95);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.85);
+    }
+    .logout-btn { border-color: rgba(248, 113, 113, 0.9); }
+    .dropdown { position: relative; display: inline-block; }
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      right: 0;
+      margin-top: 6px;
+      background: #ffffff;
+      border-radius: 10px;
+      min-width: 170px;
+      overflow: hidden;
+      box-shadow: 0 16px 36px rgba(15, 23, 42, 0.7);
+      border: 1px solid #e5e7eb;
+      z-index: 20;
+    }
+    .dropdown:hover .dropdown-content { display: block; }
+    .dropdown-content a {
+      padding: 9px 12px;
+      display: block;
+      color: #111827;
+      text-decoration: none;
+      font-size: 13px;
+      transition: background-color 0.15s ease, padding-left 0.15s ease;
+    }
+    .dropdown-content a:hover {
+      background: #f3f4f6;
+      padding-left: 18px;
+    }
+    .page-wrapper {
+      padding: 110px 18px 32px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+    .apply-card {
+      width: 100%;
+      max-width: 960px;
+      position: relative;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-strong);
+      backdrop-filter: blur(14px);
+      overflow: hidden;
+      animation: fadeInUp 0.6s ease-out;
+    }
+    .apply-card::before {
+      content: "";
+      position: absolute;
+      inset: -2px;
+      border-radius: inherit;
+      background: conic-gradient(from 190deg,
+          rgba(56, 189, 248, 0.75),
+          rgba(129, 140, 248, 0.9),
+          rgba(249, 115, 22, 0.9),
+          rgba(56, 189, 248, 0.75));
+      animation: borderSpin 12s linear infinite;
+      z-index: -1;
+    }
+    .apply-card::after {
+      content: "";
+      position: absolute;
+      inset: 2px;
+      border-radius: inherit;
+      background: radial-gradient(circle at top left,
+          rgba(56, 189, 248, 0.18),
+          transparent 55%),
+        radial-gradient(circle at bottom right,
+          rgba(249, 115, 22, 0.16),
+          transparent 55%),
+        var(--card-inner);
+      z-index: -1;
+    }
+    @keyframes borderSpin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .card-header {
+      padding: 18px 22px 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .card-header-logo {
+      width: 60px;
+      height: 60px;
+      border-radius: 14px;
+      background: rgba(15, 23, 42, 0.92);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.9);
+      overflow: hidden;
+    }
+    .card-header-logo img {
+      width: 54px;
+      height: 54px;
+      object-fit: contain;
+    }
+    .card-header-text h2 {
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #e5e7eb;
+    }
+    .card-header-text h3 {
+      margin: 2px 0 0;
+      font-size: 14px;
+      color: #cbd5f5;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+    .card-header-sub {
+      margin-top: 6px;
+      font-size: 12px;
+      color: #9ca3af;
+    }
+    .form-shell { padding: 18px 20px 20px; }
+    fieldset {
+      border-radius: 14px;
+      border: 1px solid var(--border-subtle);
+      padding: 14px 16px 16px;
+      margin: 0 0 14px;
+      background:
+        radial-gradient(circle at top left,
+          rgba(15, 23, 42, 0.98),
+          rgba(15, 23, 42, 0.96));
+    }
+    legend {
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #e5e7eb;
+      background: linear-gradient(120deg,
+          rgba(56, 189, 248, 0.3),
+          rgba(129, 140, 248, 0.3));
+      border: 1px solid rgba(148, 163, 184, 0.5);
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px 26px;
+      margin-bottom: 14px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 13px;
+    }
+    .form-group label {
+      color: #e5e7eb;
+      font-weight: 500;
+    }
+    .required-star::after {
+      content: " *";
+      color: #f97373;
+      font-weight: 700;
+    }
+    .form-group input,
+    .form-group select {
+      padding: 7px 9px;
+      border-radius: 9px;
+      border: 1px solid rgba(75, 85, 99, 0.9);
+      background: rgba(15, 23, 42, 0.9);
+      color: #e5e7eb;
+      font-size: 13px;
+      transition:
+        border-color 0.16s ease,
+        box-shadow 0.16s ease,
+        transform 0.08s ease,
+        background-color 0.16s ease;
+    }
+    .form-group input::placeholder { color: #6b7280; }
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #22c55e;
+      box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.45),
+        0 12px 30px rgba(15, 23, 42, 0.9);
+      transform: translateY(-1px);
+      background: rgba(15, 23, 42, 0.98);
+    }
+    .gender-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 13px;
+      color: #e5e7eb;
+      margin-top: 4px;
+    }
+    .gender-row input {
+      width: auto;
+      accent-color: #f97316;
+    }
+    .submit-row {
+      margin-top: 10px;
+      text-align: right;
+    }
+    .submit-btn {
+      padding: 9px 26px;
+      font-size: 14px;
+      border-radius: 999px;
+      border: none;
+      background: linear-gradient(120deg, var(--primary), var(--secondary));
+      color: #f9fafb;
+      cursor: pointer;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      box-shadow: 0 14px 30px rgba(15, 23, 42, 0.9);
+      background-size: 160% 160%;
+      background-position: 0% 50%;
+      transition:
+        background-position 0.16s ease,
+        transform 0.1s ease,
+        box-shadow 0.16s ease;
+    }
+    .submit-btn:hover {
+      background-position: 100% 50%;
+      transform: translateY(-1px);
+      box-shadow: 0 16px 32px rgba(15, 23, 42, 0.95);
+    }
+    .submit-btn:active {
+      transform: translateY(0);
+      box-shadow: 0 10px 22px rgba(15, 23, 42, 0.9);
+    }
+    .form-message {
+      text-align: left;
+      margin-top: 8px;
+      font-size: 12px;
+      min-height: 16px;
+      color: #f97373;
+    }
+    .form-message.success { color: #4ade80; }
+    @media (max-width: 900px) {
+      .page-wrapper { padding: 96px 10px 24px; }
+      .apply-card { max-width: 100%; }
+    }
+    @media (max-width: 720px) {
+      .navbar { padding: 8px 12px; }
+      .nav-title { font-size: 14px; letter-spacing: 0.09em; }
+      .card-header { flex-direction: row; align-items: flex-start; }
+      .form-row { grid-template-columns: 1fr; }
+      .card-header-text h2 { font-size: 15px; }
+      .card-header-text h3 { font-size: 12px; }
+    }
+    @media (max-width: 480px) {
+      .nav-title { display: none; }
+    }
+  </style>
+</head>
+
+<body>
+
+<video class="video-bg" autoplay muted loop playsinline>
+  <source src="/videos/hyd.mp4" type="video/mp4">
+</video>
+<div class="video-overlay"></div>
+
+<div class="navbar">
+  <div class="nav-left">
+    <button class="home-btn" onclick="location.href='/index.html'">🏠Home</button>
+    <span>MahaLakshmi Portal</span>
+  </div>
+
+  <div class="nav-right">
+    <div class="dropdown" id="loginDropdown">
+      <button class="dropdown-btn">Login ▼</button>
+      <div class="dropdown-content">
+        <a href="/login.html">User Login</a>
+        <a href="/admin/login.html">Admin Login</a>
+      </div>
+    </div>
+
+    <div class="dropdown" id="registerDropdown">
+      <button class="dropdown-btn">Register ▼</button>
+      <div class="dropdown-content">
+        <a href="/register.html">User Register</a>
+        <a href="/admin/register.html">Admin Register</a>
+      </div>
+    </div>
+
+    <button class="profile-btn" id="profileBtn" style="display:none;">My Profile</button>
+    <button class="admin-panel-btn" id="adminPanelBtn" style="display:none;">Admin Panel</button>
+    <button class="logout-btn" id="logoutBtn" style="display:none;">Logout</button>
+  </div>
+</div>
+
+<div class="page-wrapper">
+  <form id="applicationForm" class="apply-card" enctype="multipart/form-data">
+
+    <div class="card-header">
+      <div class="card-header-logo">
+        <img src="https://upload.wikimedia.org/wikipedia/en/7/77/Telangana_State_Road_Transport_Corporation_logo.png">
+      </div>
+      <div class="card-header-text">
+        <h2>TELANGANA STATE ROAD TRANSPORT CORPORATION</h2>
+        <h3>MAHALAKSHMI FREE BUS TRAVEL SCHEME</h3>
+        <div class="card-header-sub">Digital Application Form • Smart QR Bus Pass</div>
+      </div>
+    </div>
+
+    <div class="form-shell">
+
+      <fieldset>
+        <legend>Applicant Details</legend>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="required-star">Name</label>
+            <input type="text" name="name" placeholder="Full Name" required>
+          </div>
+
+          <div class="form-group">
+            <label>Father / Guardian Name</label>
+            <input type="text" name="fatherName" placeholder="Father or Guardian Name">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Date of Birth</label>
+            <input type="date" id="dob" name="dob">
+          </div>
+
+          <div class="form-group">
+            <label>Gender</label>
+            <div class="gender-row">
+              <label><input type="radio" name="gender" value="female" checked> Female</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="required-star">Aadhaar Number</label>
+            <input type="text" name="aadhar" placeholder="12-digit Aadhaar" required>
+          </div>
+
+          <div class="form-group">
+            <label class="required-star">Phone Number</label>
+            <!-- ONLY CHANGE HERE -->
+            <input type="text" name="phone" placeholder="10-digit Phone Number" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" name="email" placeholder="example@mail.com">
+          </div>
+
+          <div class="form-group">
+            <label>Photo</label>
+            <input type="file" name="photo" accept="image/*">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Aadhaar Card (File)</label>
+            <input type="file" name="aadharFile" accept="image/*,application/pdf">
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Address</legend>
+
+        <div class="form-row">
+          <div class="form-group" style="grid-column: span 2;">
+            <label>Full Address</label>
+            <input type="text" name="address" placeholder="House No, Street, Landmark">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>District</label>
+            <select id="districtSelect" name="district">
+              <option value="">-- Select District --</option>
+              <option>Hyderabad</option>
+              <option>Warangal</option>
+              <option>Karimnagar</option>
+              <option>Adilabad</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Mandal</label>
+            <input type="text" name="mandal" placeholder="Mandal">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Village / Locality</label>
+            <input type="text" name="village" placeholder="Village / Area">
+          </div>
+
+          <div class="form-group">
+            <label>Pincode</label>
+            <input type="text" name="pincode" placeholder="Pincode">
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Pass Details</legend>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>City / Zone</label>
+            <input type="text" name="city" placeholder="E.g., Hyderabad Urban">
+          </div>
+
+          <div class="form-group">
+            <label>Pass Type</label>
+            <select name="passType">
+              <option value="">-- Select --</option>
+              <option>MAHALAKSHMI FREE SCHEME</option>
+            </select>
+          </div>
+        </div>
+      </fieldset>
+
+      <div class="submit-row">
+        <button class="submit-btn" type="submit">Submit Application</button>
+        <div id="formMessage" class="form-message"></div>
+      </div>
+
+    </div>
+
+  </form>
+</div>
+
+<script>
+document.getElementById("applicationForm")
+  .addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const msg = document.getElementById("formMessage");
+    msg.textContent = "";
+    msg.classList.remove("success");
+
+    const formData = new FormData(this);
+    const btn = this.querySelector(".submit-btn");
+    btn.disabled = true;
+
+    try {
+      const result = await auth.fetchWithTokenFormData("/apply", formData);
+
+      if (result.success) {
+        msg.classList.add("success");
+        msg.textContent = "Application submitted successfully! Redirecting...";
+        this.reset();
+
+        setTimeout(() => {
+          window.location.href = "/index.html#profileBox";
+        }, 1200);
+
+      } else {
+        msg.textContent = "Error: " + (result.msg || result.error || "Unable to submit application.");
+      }
+    } catch (err) {
+      msg.textContent = "Server error. Please try again.";
+    } finally {
+      btn.disabled = false;
+    }
+  });
+</script>
+
+<script>
+const loginDropdown = document.getElementById("loginDropdown");
+const registerDropdown = document.getElementById("registerDropdown");
+const profileBtn = document.getElementById("profileBtn");
+const adminPanelBtn = document.getElementById("adminPanelBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+
+logoutBtn.onclick = () => {
+  auth.clearToken();
+  location.href = "/index.html";
+};
+
+async function setupRoleNavbar() {
+  const token = localStorage.getItem("token");
+  if (!token) return;
+
+  try {
+    const res = await fetch("/auth/role", {
+      headers: { "Authorization": "Bearer " + token }
+    });
+    const data = await res.json();
+
+    if (!data.success) return;
+
+    loginDropdown.style.display = "none";
+    registerDropdown.style.display = "none";
+
+    if (data.role === "user") {
+      profileBtn.style.display = "inline-block";
+      logoutBtn.style.display = "inline-block";
+    }
+
+    if (data.role === "admin") {
+      adminPanelBtn.style.display = "inline-block";
+      logoutBtn.style.display = "inline-block";
+    }
+
+  } catch (err) {
+    console.log("Navbar Role Error:", err);
+  }
+}
+
+profileBtn.onclick = () => {
+  location.href = "/index.html#profileBox";
+};
+
+setupRoleNavbar();
+</script>
+
+</body>
+</html>
+
+
+
+
+

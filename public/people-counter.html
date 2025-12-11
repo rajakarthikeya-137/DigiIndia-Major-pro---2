@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>People Counter | MahaLakshmi</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<!-- TensorFlow.js + COCO-SSD -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+
+<style>
+  :root {
+    --primary: #0d9488;
+    --secondary: #6366f1;
+    --card-bg: rgba(15,23,42,0.96);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: radial-gradient(circle at top, #0f172a, #020617);
+    font-family: Arial, sans-serif;
+    color: #e5e7eb;
+    overflow-x: hidden;
+  }
+
+  /* Background video */
+  #bg-video {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -2;
+  }
+
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: -1;
+  }
+
+  /* Navbar */
+  .navbar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    padding: 12px 22px;
+    background: linear-gradient(90deg, #0f766e, #4f46e5, #f97316);
+    background-size: 200% 200%;
+    animation: navMove 14s ease-in-out infinite;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 10;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.75);
+  }
+
+  @keyframes navMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  .nav-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #f9fafb;
+    font-weight: bold;
+    font-size: 18px;
+  }
+
+  .home-btn {
+    padding: 7px 14px;
+    background: rgba(15,23,42,0.2);
+    border: 1px solid rgba(248,250,252,0.7);
+    border-radius: 999px;
+    color: #f9fafb;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    backdrop-filter: blur(6px);
+    transition: 0.15s ease;
+  }
+
+  .home-btn:hover {
+    background: #f9fafb;
+    color: #0f172a;
+    transform: translateY(-1px);
+  }
+
+  .nav-right button {
+    margin-left: 8px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(248,250,252,0.7);
+    background: rgba(15,23,42,0.2);
+    color: #f9fafb;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: 0.15s ease;
+    backdrop-filter: blur(6px);
+  }
+
+  .nav-right button:hover {
+    background: #f9fafb;
+    color: #0f172a;
+  }
+
+  /* MAIN WRAPPER */
+  .wrapper {
+    padding-top: 110px;
+    display: flex;
+    justify-content: center;
+    padding-bottom: 40px;
+  }
+
+  /* Animated UI Box */
+  .big-box {
+    position: relative;
+    width: 95%;
+    max-width: 1000px;
+    padding: 20px;
+    border-radius: 18px;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.8);
+    overflow: hidden;
+    margin: 12px;
+  }
+  /* FLASH MESSAGE */
+.flash-box {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 14px 18px;
+  border-radius: 10px;
+  color: white;
+  font-size: 15px;
+  font-weight: bold;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  opacity: 0;
+  transform: translateY(20px);
+  transition: 0.4s ease;
+  z-index: 999999;
+}
+.flash-show { opacity: 1; transform: translateY(0); }
+.flash-orange { background: #f97316; }
+.flash-red { background: #dc2626; }
+
+
+  .big-box::before {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    background: conic-gradient(
+      from 180deg,
+      rgba(56,189,248,0.7),
+      rgba(129,140,248,0.9),
+      rgba(249,115,22,0.8),
+      rgba(56,189,248,0.7)
+    );
+    animation: spin 10s linear infinite;
+    z-index: -1;
+  }
+
+  .big-box::after {
+    content: "";
+    position: absolute;
+    inset: 2px;
+    border-radius: inherit;
+    background: var(--card-bg);
+    z-index: -1;
+  }
+
+  @keyframes spin {
+    100% { transform: rotate(360deg); }
+  }
+
+  .content-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .video-wrap {
+    flex: 1 1 650px;
+    position: relative;
+  }
+
+  video, canvas {
+    width: 100%;
+    border-radius: 14px;
+  }
+
+  /* Stats panel */
+  .stats-panel {
+    flex: 1 1 260px;
+    background: rgba(255,255,255,0.07);
+    padding: 18px;
+    border-radius: 14px;
+  }
+
+  .big-num {
+    font-size: 32px;
+    font-weight: 700;
+    color: white;
+  }
+
+  .btn {
+    width: 100%;
+    padding: 10px 14px;
+    background: var(--primary);
+    border-radius: 12px;
+    color: white;
+    border: none;
+    cursor: pointer;
+    margin: 6px 0;
+    font-size: 15px;
+    font-weight: bold;
+    transition: 0.2s ease;
+  }
+
+  .btn-red { background: #ef4444; }
+  .btn-gray { background: #6b7280; }
+
+  .note, .legend {
+    font-size: 12px;
+    color: #9ca3af;
+  }
+
+  /* Original minimal styles preserved for compatibility */
+  header { display:none; }
+</style>
+</head>
+<body>
+
+<!-- Background video -->
+<video id="bg-video" autoplay muted loop>
+  <source src="/videos/hyd.mp4" type="video/mp4">
+</video>
+<div class="overlay"></div>
+
+<!-- NAVBAR -->
+<div class="navbar">
+  <div class="nav-left">
+    <button class="home-btn" onclick="location.href='/index.html'">🏠 Home</button>
+    <span>People Counter Panel</span>
+  </div>
+
+  <div class="nav-right">
+    <button onclick="location.href='/conductor/dashboard.html'">Conductor Dashboard</button>
+  </div>
+</div>
+
+<!-- MAIN UI -->
+<div class="wrapper">
+  <div class="big-box">
+    <h2 style="text-align:center; margin-top:0; color:white;">Detector</h2>
+
+    <div class="content-row">
+      <div class="video-wrap">
+        <video id="singleVideo" autoplay playsinline muted></video>
+        <canvas id="singleCanvas"></canvas>
+      </div>
+
+      <div class="stats-panel">
+        <div style="margin-bottom:10px;">Live People (in view): <div id="liveCount" class="big-num">0</div></div>
+        <div style="margin-bottom:10px;">Boarded (in): <div id="boardedCount" class="big-num">0</div></div>
+        <div style="margin-bottom:10px;">Exited (out): <div id="exitedCount" class="big-num">0</div></div>
+
+        <button id="startBtn" class="btn">Start</button>
+        <button id="stopBtn" class="btn btn-red">Stop</button>
+        <button id="resetBtn" class="btn btn-gray">Reset</button>
+
+        <p class="note">Orange rectangle (left) = entry zone. Boarded = inside → moves right out. Exited = comes from right → enters rectangle → moves left (to the left edge).</p>
+        <div class="legend">Blue boxes = tracked people (ID). Trajectory lines show recent movement.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== original JS unchanged ===== -->
+<script>
+/* =========================
+   CONFIG / TUNABLES
+   ========================= */
+const VIDEO_WIDTH = 1280;   // ideal
+const VIDEO_HEIGHT = 720;   // ideal
+
+// detection filters
+const MIN_BOX_WIDTH = 40;
+const MIN_BOX_HEIGHT = 80;
+const SCORE_THRESHOLD = 0.5;
+
+// SORT/Tracker params
+const IOU_THRESHOLD = 0.35;
+const MAX_AGE = 30;     // frames a track can miss before deletion
+const N_INIT = 3;       // hits to confirm a track
+const TRAJ_LENGTH = 12; // how many center points to store
+
+// Gate (left) — will be set to x=0, y=0, h=full, width=35% of canvas
+let GATE = { x:0, y:0, w:0, h:0 };
+
+/* =========================
+   ELEMENTS
+   ========================= */
+const video = document.getElementById('singleVideo');
+const canvas = document.getElementById('singleCanvas');
+const ctx = canvas.getContext('2d');
+
+const liveCountEl = document.getElementById('liveCount');
+const boardedCountEl = document.getElementById('boardedCount');
+const exitedCountEl = document.getElementById('exitedCount');
+
+const startBtn = document.getElementById('startBtn');
+const stopBtn = document.getElementById('stopBtn');
+const resetBtn = document.getElementById('resetBtn');
+
+/* =========================
+  small matrix helpers (only what's needed)
+   ========================= */
+function zeros(n, m) { return Array.from({length:n}, ()=>Array(m).fill(0)); }
+function eye(n, scale=1) { return Array.from({length:n}, (v,i)=>Array.from({length:n}, (v2,j)=> i===j?scale:0)); }
+function transpose(A){ return A[0].map((_,i)=>A.map(r=>r[i])); }
+function matMul(A,B){
+  const m=A.length, n=A[0].length, p=B[0].length;
+  const C=Array.from({length:m}, ()=>Array(p).fill(0));
+  for(let i=0;i<m;i++){
+    for(let k=0;k<p;k++){
+      let sum=0;
+      for(let j=0;j<n;j++) sum += A[i][j] * B[j][k];
+      C[i][k]=sum;
+    }
+  }
+  return C;
+}
+function matVecMul(A,v){ return A.map(r => r.reduce((s,rv,i)=>s + rv * v[i], 0)); }
+function vecAdd(a,b){ return a.map((v,i)=>v + b[i]); }
+function vecSub(a,b){ return a.map((v,i)=>v - b[i]); }
+function matAdd(A,B){ return A.map((r,i)=>r.map((v,j)=>v + B[i][j])); }
+function matSub(A,B){ return A.map((r,i)=>r.map((v,j)=>v - B[i][j])); }
+
+/* naive inverse for small matrices using Gaussian elimination (4x4 used) */
+function inverse(A){
+  const n=A.length;
+  const M=A.map((r,i)=>r.concat(eye(n)[i]));
+  for(let i=0;i<n;i++){
+    // pivot
+    let piv=M[i][i];
+    if(Math.abs(piv) < 1e-12){
+      // swap with a lower row
+      for(let r=i+1;r<n;r++){
+        if(Math.abs(M[r][i])>1e-12){ [M[i],M[r]]=[M[r],M[i]]; piv=M[i][i]; break; }
+      }
+    }
+    if(Math.abs(piv) < 1e-12) return eye(n); // fallback
+    for(let j=0;j<2*n;j++) M[i][j] /= piv;
+    for(let r=0;r<n;r++){
+      if(r===i) continue;
+      const fac = M[r][i];
+      for(let j=0;j<2*n;j++){
+        M[r][j] -= fac * M[i][j];
+      }
+    }
+  }
+  return M.map(r => r.slice(n));
+}
+
+/* convert bbox <x,y,w,h> to measurement z = [cx,cy,s,ar] */
+function bboxToZ(box){
+  const [x,y,w,h] = box;
+  const cx = x + w/2;
+  const cy = y + h/2;
+  const s = w*h;
+  const ar = w / (h + 1e-6);
+  return [cx, cy, s, ar];
+}
+function zToBbox(z){
+  const [cx,cy,s,ar] = z;
+  const w = Math.sqrt(Math.abs(s*ar));
+  const h = s / (w + 1e-6);
+  return [cx - w/2, cy - h/2, w, h];
+}
+
+/* =========================
+   Kalman Filter (simple constant velocity in cx,cy,s)
+   ========================= */
+class KalmanFilter {
+  constructor(){
+    this._dimX = 7; // [cx,cy,s,ar, vx,vy,vs]
+    this._dimZ = 4;
+    this.x = Array(this._dimX).fill(0);
+    this.F = eye(this._dimX); // state transition
+    // add motion for positions from velocities
+    this.F[0][4]=1; this.F[1][5]=1; this.F[2][6]=1;
+
+    this.H = zeros(this._dimZ, this._dimX);
+    this.H[0][0]=1; this.H[1][1]=1; this.H[2][2]=1; this.H[3][3]=1;
+
+    this.P = eye(this._dimX).map((r,i)=>r.map((v,j)=> v * (i<4?10:100)));
+    this.Q = eye(this._dimX).map((r,i)=>r.map((v,j)=> v * (i<4?1e-2:1e-1)));
+    this.R = eye(this._dimZ).map((r,i)=>r.map((v,j)=> v * (i<3?10:0.1)));
+  }
+
+  init(z){
+    this.x = [z[0], z[1], z[2], z[3], 0,0,0];
+  }
+
+  predict(){
+    // x = F * x
+    this.x = matVecMul(this.F, this.x);
+    // P = F P F^T + Q
+    this.P = matAdd(matMul(this.F, matMul(this.P, transpose(this.F))), this.Q);
+  }
+
+  update(z){
+    const zPred = matVecMul(this.H, this.x);
+    const y = vecSub(z, zPred);
+    const S = matAdd(matMul(this.H, matMul(this.P, transpose(this.H))), this.R);
+    const K = matMul(this.P, matMul(transpose(this.H), inverse(S)));
+    this.x = vecAdd(this.x, matVecMul(K, y));
+    const I = eye(this._dimX);
+    const KH = matMul(K, this.H);
+    this.P = matMul(matSub(I, KH), this.P);
+  }
+
+  getBbox(){
+    const z = [this.x[0], this.x[1], this.x[2], this.x[3]];
+    return zToBbox(z);
+  }
+}
+
+/* =========================
+   Track class + SORT manager
+   ========================= */
+let NEXT_TRACK_ID = 1;
+class Track {
+  constructor(bbox){
+    this.kf = new KalmanFilter();
+    const z = bboxToZ(bbox);
+    this.kf.init(z);
+    this.timeSinceUpdate = 0;
+    this.id = NEXT_TRACK_ID++;
+    this.hits = 1;
+    this.age = 1;
+    this.history = []; // centers
+    const c = [bbox[0] + bbox[2]/2, bbox[1] + bbox[3]/2];
+    this.history.push(c);
+    this.confirmed = false;
+    this._counted = false;
+    this.prevInside = pointInsideGate(c);
+  }
+
+  predict(){
+    this.kf.predict();
+    this.timeSinceUpdate++;
+    this.age++;
+    // update history with predicted bbox center
+    const [x,y,w,h] = this.kf.getBbox();
+    const c = [x + w/2, y + h/2];
+    this.history.push(c);
+    if(this.history.length > TRAJ_LENGTH) this.history.shift();
+  }
+
+  update(bbox){
+    const z = bboxToZ(bbox);
+    this.kf.update(z);
+    this.timeSinceUpdate = 0;
+    this.hits++;
+    const c = [bbox[0] + bbox[2]/2, bbox[1] + bbox[3]/2];
+    this.history.push(c);
+    if(this.history.length > TRAJ_LENGTH) this.history.shift();
+    if(!this.confirmed && this.hits >= N_INIT) this.confirmed = true;
+  }
+
+  isDead(){ return this.timeSinceUpdate > MAX_AGE; }
+
+  getBbox(){ return this.kf.getBbox(); }
+
+  lastCenter(){ return this.history[this.history.length-1]; }
+}
+
+class SortTracker {
+  constructor(iouThreshold=IOU_THRESHOLD){
+    this.iouThreshold = iouThreshold;
+    this.tracks = [];
+  }
+
+  predict(){
+    this.tracks.forEach(t => t.predict());
+  }
+
+  update(detections){
+    // detections: array of [x,y,w,h]
+    const N = this.tracks.length;
+    const M = detections.length;
+    const iouMat = Array.from({length:N}, ()=> Array(M).fill(0));
+    for(let i=0;i<N;i++){
+      const tb = this.tracks[i].getBbox();
+      for(let j=0;j<M;j++){
+        iouMat[i][j] = iou(tb, detections[j]);
+      }
+    }
+
+    const matchedT = new Set(), matchedD = new Set();
+    const matches = [];
+    // greedy match highest IoU
+    while(true){
+      let bestI=-1,bestJ=-1,bestVal=this.iouThreshold;
+      for(let i=0;i<N;i++){
+        if(matchedT.has(i)) continue;
+        for(let j=0;j<M;j++){
+          if(matchedD.has(j)) continue;
+          if(iouMat[i][j] > bestVal){
+            bestVal = iouMat[i][j];
+            bestI = i; bestJ = j;
+          }
+        }
+      }
+      if(bestI === -1) break;
+      matchedT.add(bestI); matchedD.add(bestJ);
+      matches.push([bestI, bestJ]);
+    }
+
+    // update matched tracks
+    for(const [ti,dj] of matches){
+      this.tracks[ti].update(detections[dj]);
+    }
+
+    // create new tracks for unmatched detections
+    for(let j=0;j<M;j++){
+      if(!matchedD.has(j)) this.tracks.push(new Track(detections[j]));
+    }
+
+    // mark misses for unmatched tracks
+    for(let i=0;i<N;i++){
+      if(!matchedT.has(i)) this.tracks[i].timeSinceUpdate++;
+    }
+
+    // remove dead tracks
+    this.tracks = this.tracks.filter(t => !t.isDead());
+  }
+
+  getConfirmed(){
+    return this.tracks.filter(t => t.confirmed);
+  }
+}
+
+/* IoU helper */
+function iou(boxA, boxB){
+  const [xA,yA,wA,hA] = boxA;
+  const [xB,yB,wB,hB] = boxB;
+  const x1 = Math.max(xA, xB), y1 = Math.max(yA, yB);
+  const x2 = Math.min(xA+wA, xB+wB), y2 = Math.min(yA+hA, yB+hB);
+  const iw = Math.max(0, x2-x1), ih = Math.max(0, y2-y1);
+  const inter = iw*ih;
+  const union = wA*hA + wB*hB - inter;
+  return union <= 0 ? 0 : inter / union;
+}
+
+/* =========================
+   Gate helpers
+   ========================= */
+function updateGateForCanvas(){
+  const W = canvas.width;
+  const H = canvas.height;
+  GATE.x = 0;
+  GATE.y = 0;
+  GATE.w = Math.round(W * 0.35); // 35% width from left
+  GATE.h = H;
+}
+function pointInsideGate(pt){
+  const [x,y] = pt;
+  return x >= GATE.x && x <= (GATE.x + GATE.w) && y >= GATE.y && y <= (GATE.y + GATE.h);
+}
+
+/* =========================
+   Tracker instance & counts
+   ========================= */
+const tracker = new SortTracker(IOU_THRESHOLD);
+let boarded = 0, exited = 0;
+
+/* =========================
+   sendCountToServer (AUTO SEND per event - option A)
+   Sends increments to server endpoint /bus/updateCount (expects conductor token)
+   ========================= */
+async function sendCountToServer(boardedInc, exitedInc) {
+  try {
+    const token = localStorage.getItem("token");
+    const busNo = localStorage.getItem("conductorBusNo"); // or fetch from conductor profile
+
+    if (!token || !busNo) {
+      // not fatal; just log
+      console.log("sendCountToServer: missing token or busNo; skipping server update.");
+      return;
+    }
+
+    await fetch("/bus/updateCount", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify({ busNo, boarded: boardedInc, exited: exitedInc })
+    });
+  } catch (err) {
+    console.log("Server update error:", err);
+  }
+}
+
+/* =========================
+   Detection + counting logic
+   ========================= */
+async function detectionLoop(){
+  if(!running || !modelLoaded) {
+    requestAnimationFrame(detectionLoop);
+    return;
+  }
+
+  // run detector
+  let predictions = [];
+  try {
+    predictions = await model.detect(video);
+  } catch(e) {
+    // detection can fail sometimes; continue
+    console.warn("Model detect error:", e);
+  }
+
+  // build filtered detection list
+  const dets = [];
+  for(const p of predictions){
+    if(p.class !== 'person') continue;
+    if(p.score < SCORE_THRESHOLD) continue;
+    const [x,y,w,h] = p.bbox;
+    if(w < MIN_BOX_WIDTH || h < MIN_BOX_HEIGHT) continue;
+    // clamp within canvas
+    const bx = Math.max(0, Math.min(x, canvas.width-1));
+    const by = Math.max(0, Math.min(y, canvas.height-1));
+    const bw = Math.min(w, canvas.width - bx);
+    const bh = Math.min(h, canvas.height - by);
+    dets.push([bx,by,bw,bh]);
+  }
+
+  // tracker predict & update
+  tracker.predict();
+  tracker.update(dets);
+
+  // draw video frame to canvas
+  ctx.clearRect(0,0,canvas.width, canvas.height);
+  try { ctx.drawImage(video, 0, 0, canvas.width, canvas.height); } catch(e){ /* sometimes not ready */ }
+
+  // draw gate
+  drawGate();
+
+  // overlay tracks
+  const confirmed = tracker.getConfirmed();
+  liveCountEl.innerText = dets.length;
+
+  for(const tr of confirmed){
+    const [x,y,w,h] = tr.getBbox();
+    // box
+    ctx.strokeStyle = "rgba(0,200,255,0.95)";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x, y, w, h);
+
+    // ID label
+    ctx.fillStyle = "rgba(0,0,0,0.6)";
+    ctx.fillRect(x, y-18, 48, 16);
+    ctx.fillStyle = "white";
+    ctx.font = "13px Arial";
+    ctx.fillText("ID " + tr.id, x + 4, y - 6);
+
+    // trajectory
+    if(tr.history.length > 1){
+      ctx.beginPath();
+      for(let i=0;i<tr.history.length;i++){
+        const [cx,cy] = tr.history[i];
+        if(i===0) ctx.moveTo(cx, cy); else ctx.lineTo(cx, cy);
+      }
+      ctx.strokeStyle = "rgba(0,255,150,0.7)";
+      ctx.lineWidth = 1.4;
+      ctx.stroke();
+    }
+    // =============== BOARDING LOGIC (LEFT → RIGHT) ===============
+if (!tr._counted && tr.history.length >= 3) {
+    const hist = tr.history;
+    const prev = hist[hist.length - 3];
+    const mid  = hist[hist.length - 2];
+    const cur  = hist[hist.length - 1];
+
+    const dx = cur[0] - mid[0];
+    const wasInside = tr.prevInside;
+    const nowInside = pointInsideGate(cur);
+
+    // Person exits entry zone moving RIGHT → boarding
+    if (wasInside && !nowInside && dx > 1.5) {
+        boarded++;
+        tr._counted = true;
+        sendCountToServer(1, 0).catch(()=>{});
+    }
+}
+
+// =============== EXIT LOGIC (RIGHT → LEFT) ===============
+if (!tr._counted && tr.history.length >= 3) {
+    const hist = tr.history;
+    const prev = hist[hist.length - 3];
+    const mid  = hist[hist.length - 2];
+    const cur  = hist[hist.length - 1];
+
+    const dx = cur[0] - mid[0];
+    const nowInside = pointInsideGate(cur);
+    const wasInside = tr.prevInside;
+
+    const gateRight = GATE.x + GATE.w;
+
+    // Person was OUTSIDE gate on right side
+    const cameFromRight = prev[0] > gateRight;
+
+    // Person is moving left
+    const movingLeft = dx < -1.5;
+
+    // Person enters gate FROM RIGHT (not from inside)
+    if (!wasInside && cameFromRight && nowInside && movingLeft) {
+        exited++;
+        tr._counted = true;
+        sendCountToServer(0, 1).catch(()=>{});
+    }
+}
+
+
+    // update prevInside for next iteration
+    const lastC = tr.lastCenter();
+    tr.prevInside = pointInsideGate(lastC);
+  }
+
+  // update UI
+  boardedCountEl.innerText = boarded;
+  exitedCountEl.innerText = exited;
+
+  requestAnimationFrame(detectionLoop);
+}
+
+/* =========================
+   Drawing gate visually
+   ========================= */
+function drawGate(){
+  ctx.save();
+  ctx.strokeStyle = "orange";
+  ctx.lineWidth = 3;
+  ctx.strokeRect(GATE.x + 0.5, GATE.y + 0.5, GATE.w - 1, GATE.h - 1);
+
+  // filled semi-transparent overlay for gate area (subtle)
+  ctx.fillStyle = "rgba(255,165,0,0.04)";
+  ctx.fillRect(GATE.x, GATE.y, GATE.w, GATE.h);
+
+  ctx.fillStyle = "orange";
+  ctx.font = "16px Arial";
+  ctx.fillText("ENTRY ZONE", GATE.x + 6, 20);
+  ctx.restore();
+}
+
+/* =========================
+   Camera + Model
+   ========================= */
+let model = null;
+let modelLoaded = false;
+let running = false;
+
+async function startCamera(){
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "environment", width: { ideal: VIDEO_WIDTH }, height: { ideal: VIDEO_HEIGHT } },
+      audio: false
+    });
+    video.srcObject = stream;
+
+    video.onloadedmetadata = () => {
+      // set canvas to actual video size (avoid CSS zoom)
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      updateGateForCanvas();
+      running = true;
+    };
+  } catch (e){
+    alert('Camera error: ' + (e.message || e));
+    console.error(e);
+  }
+}
+
+function stopCamera(){
+  running = false;
+  const s = video.srcObject;
+  if(s && s.getTracks) s.getTracks().forEach(t => t.stop());
+  video.srcObject = null;
+}
+
+/* load model */
+async function loadModel(){
+  model = await cocoSsd.load();
+  modelLoaded = true;
+  console.log("COCO-SSD model loaded");
+}
+
+/* =========================
+   BUTTONS
+   ========================= */
+startBtn.onclick = async () => {
+  if(!modelLoaded) await loadModel();
+  await startCamera();
+  // reset tracker & counts
+  tracker.tracks = [];
+  NEXT_TRACK_ID = 1;
+  boarded = 0; exited = 0;
+  boardedCountEl.innerText = 0;
+  exitedCountEl.innerText = 0;
+  requestAnimationFrame(detectionLoop);
+};
+
+stopBtn.onclick = () => {
+  stopCamera();
+};
+/* =========================
+   FLASH POPUP FUNCTION
+   ========================= */
+function showFlash(msg, colorClass) {
+  const box = document.getElementById("flashMsg");
+  box.innerText = msg;
+  box.className = "flash-box " + colorClass;
+  box.classList.add("flash-show");
+
+  setTimeout(() => {
+    box.classList.remove("flash-show");
+  }, 2500);
+}
+
+/* =========================
+   SEAT LIMIT FLASH TRIGGERS
+   Add these inside detectionLoop(), 
+   immediately AFTER:
+   boardedCountEl.innerText = boarded;
+   ========================= */
+
+function seatFlashCheck(boarded) {
+  // Standing seats only
+  if (boarded >= 5 && boarded < 10) {
+    showFlash("Only standing seats available!", "flash-orange");
+  }
+
+  // Bus overloaded
+  if (boarded >= 10) {
+    showFlash("Bus overloaded! Passengers cannot board!", "flash-red");
+  }
+}
+
+resetBtn.onclick = () => {
+  tracker.tracks = [];
+  NEXT_TRACK_ID = 1;
+  boarded = 0;
+  exited = 0;
+
+  boardedCountEl.innerText = 0;
+  exitedCountEl.innerText = 0;
+  liveCountEl.innerText = 0;
+
+  // CLEAR FLASH BOX (optional but recommended)
+  const flash = document.getElementById("flashMsg");
+  flash.classList.remove("flash-show");
+  flash.innerText = "";
+};
+
+
+/* preload model */
+loadModel();
+
+</script>
+<div id="flashMsg" class="flash-box"></div>
+
+</body>
+</html>

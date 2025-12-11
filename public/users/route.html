@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Route View | MahaLakshmi</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- MAPBOX -->
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.js"></script>
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.css" rel="stylesheet"/>
+
+<style>
+  :root {
+    --primary: #0d9488;
+    --secondary: #6366f1;
+    --accent: #f97316;
+    --card-bg: rgba(255,255,255,0.85);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: #f1f5f9; /* LIGHT MODE BACKGROUND */
+    color: #0f172a;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+  }
+
+  /* Background video */
+  #bg-video {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -3;
+    filter: brightness(0.75); /* Lighter mood */
+  }
+
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(255,255,255,0.25); /* LIGHT overlay */
+    z-index: -2;
+  }
+
+  /* MAP GLOW CARD WRAPPER (same design as login box) */
+.map-card {
+  position: relative;
+  width: 92%;
+  max-width: 1100px;
+  margin: 20px auto 0 auto;
+  padding: 10px;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.25);
+}
+
+.map-card::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from 180deg,
+    rgba(56,189,248,0.7),
+    rgba(129,140,248,0.9),
+    rgba(249,115,22,0.8),
+    rgba(56,189,248,0.7)
+  );
+  animation: spin 10s linear infinite;
+  z-index: -1;
+}
+
+.map-card::after {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border-radius: inherit;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(15px);
+  z-index: -1;
+}
+
+@keyframes spin {
+  100% { transform: rotate(360deg); }
+}
+
+/* Make actual map fit inside card window */
+#map {
+  width: 100%;
+  height: 550px !important;
+  border-radius: 14px;
+}
+
+  /* Navbar */
+  .navbar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    padding: 12px 22px;
+    background: linear-gradient(90deg, #0f766e, #4f46e5, #f97316);
+    background-size: 200% 200%;
+    animation: navMove 14s ease-in-out infinite;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    z-index: 10;
+    color: #fff;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+  }
+
+  @keyframes navMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  .home-btn {
+    padding: 7px 14px;
+    background: rgba(255,255,255,0.25);
+    border: 1px solid rgba(255,255,255,0.7);
+    border-radius: 999px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 13px;
+    backdrop-filter: blur(6px);
+    transition: 0.15s ease;
+  }
+
+  .home-btn:hover {
+    background: rgba(255,255,255,0.9);
+    color: #0f172a;
+  }
+
+  .nav-title {
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  /* Top bar */
+  .top-bar {
+    margin-top: 74px;
+    padding: 12px;
+    text-align: center;
+    font-size: 15px;
+    background: rgba(255,255,255,0.75);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(0,0,0,0.2);
+    color: #0f172a;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.1);
+  }
+
+  /* Map container */
+  #map {
+    width: 100%;
+    height: calc(100vh - 90px);
+    border-radius: 0;
+  }
+
+</style>
+</head>
+
+<body>
+
+<!-- Background video -->
+<video id="bg-video" autoplay muted loop>
+  <source src="/videos/hyd.mp4" type="video/mp4">
+</video>
+<div class="overlay"></div>
+
+<!-- Navbar -->
+<div class="navbar">
+  <button class="home-btn" onclick="location.href='/users/mytickets.html'">⬅ Back</button>
+  <span class="nav-title">🚌 Route Viewer</span>
+</div>
+
+<div class="top-bar" id="tripInfo">Loading route...</div>
+
+<div class="map-card">
+  <div id="map"></div>
+</div>
+
+<script>
+mapboxgl.accessToken =
+"pk.eyJ1IjoicmFtMDkwOTAiLCJhIjoiY21pd3h1cGlmMDB2djNjcjB3cWU0dTdnNyJ9.mG2bnAWtLI-pZCPcKko_WQ";
+
+const url = new URL(window.location.href);
+const source = url.searchParams.get("source");
+const destination = url.searchParams.get("destination");
+const busNo = url.searchParams.get("busNo");
+
+document.getElementById("tripInfo").textContent =
+  `🚌 Bus ${busNo} — ${source} → ${destination}`;
+
+/* LIGHT MODE MAP */
+const map = new mapboxgl.Map({
+  container: "map",
+  style: "mapbox://styles/mapbox/streets-v12", // <-- CHANGE THIS
+  zoom: 10,
+  center: [74.5, 15.8]
+});
+
+let busMarker = null;
+
+// ------------------------------
+// GET COORDINATES
+// ------------------------------
+async function getCoords(place) {
+  const res = await fetch(
+    `https://api.mapbox.com/geocoding/v5/mapbox.places/`
+    + `${encodeURIComponent(place)} India.json`
+    + `?limit=1&access_token=${mapboxgl.accessToken}`
+  );
+
+  const data = await res.json();
+  if (!data.features || data.features.length === 0) {
+    alert("❌ LOCATION NOT FOUND: " + place);
+    return null;
+  }
+  return data.features[0].center;
+}
+
+// ------------------------------
+// DRAW ROUTE
+// ------------------------------
+async function drawRoute() {
+  const start = await getCoords(source);
+  const end = await getCoords(destination);
+
+  if (!start || !end) return;
+
+  map.fitBounds([start, end], { padding: 50 });
+
+  const res = await fetch(
+    `https://api.mapbox.com/directions/v5/mapbox/driving/`
+    + `${start[0]},${start[1]};${end[0]},${end[1]}`
+    + `?geometries=geojson&access_token=${mapboxgl.accessToken}`
+  );
+
+  const json = await res.json();
+  if (!json.routes || json.routes.length === 0) {
+    alert("❌ Route not found.");
+    return;
+  }
+
+  const route = json.routes[0].geometry;
+
+  if (map.getSource("route")) map.removeSource("route");
+  if (map.getLayer("route")) map.removeLayer("route");
+
+  map.addSource("route", {
+    type: "geojson",
+    data: { type: "Feature", geometry: route }
+  });
+
+  map.addLayer({
+    id: "route",
+    type: "line",
+    source: "route",
+    paint: {
+      "line-width": 6,
+      "line-color": "#1e40af" /* BLUE for LIGHT mode */
+    }
+  });
+}
+
+// ------------------------------
+// LIVE BUS MARKER
+// ------------------------------
+async function pollBus() {
+  try {
+    let res = await fetch(`/buslocation/${busNo}`);
+    let data = await res.json();
+
+    if (!data.success || !data.location) return;
+
+    const { lat, lng } = data.location;
+
+    if (!busMarker) {
+      busMarker = new mapboxgl.Marker({
+        color: "#f97316"
+      })
+        .setLngLat([lng, lat])
+        .addTo(map);
+    } else {
+      busMarker.setLngLat([lng, lat]);
+    }
+
+  } catch (err) {
+    console.log("Bus tracking error:", err);
+  }
+}
+
+map.on("load", () => {
+  drawRoute();
+  setInterval(pollBus, 2000);
+});
+</script>
+
+</body>
+</html>

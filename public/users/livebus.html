@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Live Bus Tracking | MahaLakshmi</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- MAPBOX -->
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.js"></script>
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.css" rel="stylesheet"/>
+
+<style>
+  :root {
+    --primary: #0d9488;
+    --secondary: #6366f1;
+    --accent: #f97316;
+    --card-bg: rgba(15,23,42,0.96);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    color: #e5e7eb;
+    overflow-x: hidden;
+  }
+
+  /* Background Video */
+  #bg-video {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.55);
+    z-index: -2;
+  }
+
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: -1;
+  }
+
+  /* NAVBAR */
+  .navbar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    padding: 12px 22px;
+    background: linear-gradient(90deg, #0f766e, #4f46e5, #f97316);
+    background-size: 200% 200%;
+    animation: navMove 14s infinite;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.75);
+    z-index: 50;
+  }
+
+  @keyframes navMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  .nav-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: bold;
+    font-size: 18px;
+    color: #f9fafb;
+  }
+
+  .nav-right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+  }
+
+  .home-btn {
+    padding: 7px 14px;
+    background: rgba(15,23,42,0.2);
+    border: 1px solid rgba(248,250,252,0.7);
+    border-radius: 999px;
+    color: #f9fafb;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    backdrop-filter: blur(6px);
+    transition: 0.15s ease;
+  }
+
+  .home-btn:hover {
+    background: #f9fafb;
+    color: #0f172a;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(15,23,42,0.9);
+  }
+
+  #searchBox {
+    padding: 7px 12px;
+    border-radius: 12px;
+    border: none;
+    outline: none;
+    width: 220px;
+    font-size: 14px;
+  }
+
+  #searchBtn {
+    padding: 8px 16px;
+    border-radius: 12px;
+    border: none;
+    background: #38bdf8;
+    color: #0f172a;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.15s;
+    font-size: 14px;
+  }
+
+  #searchBtn:hover {
+    background: #0891b2;
+  }
+
+  .suggestions {
+    position: absolute;
+    top: 42px;
+    right: 0;
+    width: 240px;
+    max-height: 180px;
+    overflow-y: auto;
+    background: rgba(15,23,42,0.98);
+    border-radius: 10px;
+    border: 1px solid rgba(148,163,184,0.7);
+    box-shadow: 0 14px 30px rgba(0,0,0,0.8);
+    font-size: 13px;
+    display: none;
+    z-index: 60;
+  }
+
+  .wrapper {
+    padding-top: 90px;
+    padding-bottom: 32px;
+    min-height: 100vh;
+  }
+
+  .flash {
+    width: 90%;
+    max-width: 900px;
+    margin: 90px auto 10px auto;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    background: rgba(15,23,42,0.95);
+    border: 1px solid #38bdf8;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+    display: none;
+  }
+  .flash.info { border-color: #38bdf8; color: #e0f2fe; }
+  .flash.error { border-color: #f97373; color: #fecaca; }
+  .flash.success { border-color: #4ade80; color: #bbf7d0; }
+
+  #statusText {
+    width: 90%;
+    max-width: 900px;
+    margin: 4px auto 6px auto;
+    font-size: 13px;
+    color: #e5e7eb;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+  }
+
+  #map {
+    width: 90%;
+    max-width: 900px;
+    height: 500px;
+    margin: 10px auto 0 auto;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.7);
+  }
+
+  .bus-marker {
+    background-image: url('/bus.png');
+    background-size: cover;
+    width: 45px;
+    height: 45px;
+    transform-origin: 50% 50%;
+    transition: transform 0.25s linear;
+  }
+</style>
+</head>
+
+<body>
+
+<!-- Background -->
+<video id="bg-video" autoplay muted loop>
+  <source src="/videos/hyd.mp4" type="video/mp4">
+</video>
+<div class="overlay"></div>
+
+<!-- NAVBAR -->
+<div class="navbar">
+  <div class="nav-left">
+    <button class="home-btn" onclick="location.href='/'">⬅ Home</button>
+    <span>🚌 Live Bus Tracking</span>
+  </div>
+
+  <div class="nav-right">
+    <input type="text" id="searchBox" placeholder="Bus No (ex: TS-09-6998)">
+    <button id="searchBtn">Search</button>
+    <div id="suggestions" class="suggestions"></div>
+  </div>
+</div>
+
+<div class="wrapper">
+
+  <div id="flash" class="flash info"></div>
+  <div id="statusText">Enter a bus number and click Search to start tracking.</div>
+
+  <!-- BUS INFO PANEL (UNCHANGED) -->
+  <div id="busInfoPanel" style="
+    width: 90%;
+    max-width: 900px;
+    margin: 10px auto;
+    padding: 12px;
+    border-radius: 12px;
+    background: rgba(15,23,42,0.85);
+    border: 1px solid rgba(148,163,184,0.5);
+    display: none;
+    font-size: 14px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.55);
+  ">
+    <div id="busInfoText">Loading bus info...</div>
+  </div>
+
+  <div id="map"></div>
+</div>
+
+<script>
+mapboxgl.accessToken =
+"pk.eyJ1IjoicmFtMDkwOTAiLCJhIjoiY21pd3h1cGlmMDB2djNjcjB3cWU0dTdnNyJ9.mG2bnAWtLI-pZCPcKko_WQ";
+
+function setFlash(msg, type = "info") {
+  const el = document.getElementById("flash");
+  if (!msg) {
+    el.style.display = "none";
+    return;
+  }
+  el.textContent = msg;
+  el.className = "flash " + type;
+  el.style.display = "block";
+}
+
+let selectedBus = null;
+let pollInterval = null;
+let marker = null;
+let lastLat = null;
+let lastLng = null;
+let lastTime = null;
+
+const statusText = document.getElementById("statusText");
+
+function haversineKm(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const toRad = x => x * Math.PI / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat/2)**2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+    Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+const map = new mapboxgl.Map({
+  container: "map",
+  style: "mapbox://styles/mapbox/streets-v12",
+  center: [78.4867, 17.3850],
+  zoom: 12
+});
+
+/* STOP POLLING */
+function stopPolling() {
+  if (pollInterval) {
+    clearInterval(pollInterval);
+    pollInterval = null;
+  }
+}
+
+/* CLEAR MARKER */
+function clearMarker() {
+  if (marker) {
+    marker.remove();
+    marker = null;
+  }
+}
+
+/* START POLLING */
+function startPolling() {
+  stopPolling();
+  pollInterval = setInterval(updateBus, 2000);
+}
+
+/* SEARCH BUTTON */
+document.getElementById("searchBtn").addEventListener("click", () => {
+  const bus = document.getElementById("searchBox").value.trim();
+
+  if (!bus) {
+    setFlash("Enter a valid bus number to track.", "error");
+    statusText.textContent = "No bus selected.";
+    selectedBus = null;
+    stopPolling();
+    clearMarker();
+    return;
+  }
+
+  selectedBus = bus.toUpperCase();
+  lastLat = null;
+  lastLng = null;
+  lastTime = null;
+
+  loadBusInfo(selectedBus);
+
+  setFlash(`Looking for live tracking of Bus ${bus}...`, "info");
+  statusText.textContent = `Tracking requested for Bus ${bus}. Waiting for location...`;
+
+  clearMarker();
+  startPolling();
+});
+
+/* LOAD BUS SEAT INFO */
+async function loadBusInfo(busNo) {
+  try {
+    const res = await fetch(`/businfo/${encodeURIComponent(busNo)}`);
+    const data = await res.json();
+
+    const panel = document.getElementById("busInfoPanel");
+    const text = document.getElementById("busInfoText");
+
+    panel.style.display = "block";
+
+    if (!data.success) {
+      text.innerHTML = `<span style="color:#f87171;">No passenger information found for Bus ${busNo}.</span>`;
+      return;
+    }
+
+    let color = "#4ade80";
+    if (data.status === "Standing Available") color = "#facc15";
+    if (data.status === "Overloaded") color = "#f87171";
+
+    text.innerHTML = `
+      <b>🚌 Bus:</b> ${data.busNo}<br>
+      <b>Total Passengers:</b> ${data.totalPassengers} / 10<br>
+      <b>Sitting:</b> ${data.sittingUsed} used, ${data.sittingLeft} left<br>
+      <b>Standing:</b> ${data.standingUsed} used, ${data.standingLeft} left<br>
+      <b>Status:</b> <span style="color:${color}; font-weight:bold;">${data.status}</span>
+    `;
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+/* LIVE BUS GPS */
+async function updateBus() {
+  if (!selectedBus) return;
+
+  let response;
+  try {
+    response = await fetch(`/buslocation/${encodeURIComponent(selectedBus)}`);
+  } catch (e) {
+    setFlash("Network error while fetching bus location.", "error");
+    return;
+  }
+
+  if (!response.ok) {
+    setFlash("Server error while fetching bus location.", "error");
+    return;
+  }
+
+  let data = await response.json();
+
+  if (!data.success || !data.location) {
+    setFlash("No live location yet.", "info");
+    return;
+  }
+
+  let lat = Number(data.location.lat);
+  let lng = Number(data.location.lng);
+
+  if (!marker) {
+    const el = document.createElement("div");
+    el.className = "bus-marker";
+
+    marker = new mapboxgl.Marker(el).setLngLat([lng, lat]).addTo(map);
+  } else {
+    marker.setLngLat([lng, lat]);
+  }
+
+  map.easeTo({ center: [lng, lat], zoom: 14 });
+
+  statusText.textContent = `📍 Bus ${selectedBus} at [${lat.toFixed(
+    5
+  )}, ${lng.toFixed(5)}]`;
+}
+</script>
+
+</body>
+</html>

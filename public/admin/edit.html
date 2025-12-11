@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Edit Application | MahaLakshmi</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+:root {
+  --primary: #0d9488;
+  --secondary: #6366f1;
+  --card-bg: rgba(15,23,42,0.96);
+}
+
+/* GLOBAL */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: radial-gradient(circle at top, #0f172a, #020617);
+  color: #e5e7eb;
+  overflow-x: hidden;
+}
+
+/* VIDEO BG */
+#bg-video {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -2;
+  filter: brightness(0.45);
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: -1;
+}
+
+/* ================================
+   ✅ NEW NAVBAR (Copied 100% same)
+   ================================ */
+.navbar {
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding: 12px 24px;
+  background: linear-gradient(90deg, #0f766e, #4f46e5, #f97316);
+  background-size: 200% 200%;
+  animation: navMove 14s ease-in-out infinite;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 999;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.75);
+}
+
+@keyframes navMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #f9fafb;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.nav-left span {
+  font-size: 18px;
+  letter-spacing: 0.08em;
+}
+
+/* NAV RIGHT BUTTONS (copied same) */
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-right: 10px;
+}
+
+.nav-right button {
+  padding: 7px 14px;
+  background: rgba(15,23,42,0.2);
+  border-radius: 999px;
+  border: 1px solid rgba(248,250,252,0.7);
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 13px;
+  color: #f9fafb;
+  backdrop-filter: blur(6px);
+  transition: 0.15s ease;
+}
+.nav-right {
+  margin-right: 50px;
+}
+
+.nav-right button:hover {
+  background: #f9fafb;
+  color: #0f172a;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(15,23,42,0.9);
+}
+
+/* MAIN WRAPPER */
+.wrapper {
+  padding-top: 130px;
+  padding-bottom: 60px;
+  display: flex;
+  justify-content: center;
+}
+
+/*********************
+   GLOW CARD
+*********************/
+.card {
+  width: 430px;
+  padding: 30px;
+  border-radius: 22px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 25px 55px rgba(0,0,0,0.95);
+}
+
+/* border glow */
+.card::before {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  background: conic-gradient(
+    rgba(56,189,248,0.9),
+    rgba(129,140,248,0.9),
+    rgba(249,115,22,0.9),
+    rgba(56,189,248,0.9)
+  );
+  animation: spin 6s linear infinite;
+  z-index: -1;
+}
+
+@keyframes spin { 100%{transform:rotate(360deg);} }
+
+.card::after {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border-radius: inherit;
+  background: var(--card-bg);
+  z-index: -1;
+}
+
+/**********************
+  FORM ELEMENTS
+**********************/
+h2 {
+  text-align:center;
+  margin: 0 0 4px;
+}
+
+#updatedText {
+  text-align:center;
+  font-size:13px;
+  color:#cbd5f5;
+  margin: 0 0 10px;
+}
+
+label {
+  display:block;
+  margin-top:14px;
+  font-size:14px;
+}
+
+input, textarea {
+  width:100%;
+  padding:11px;
+  margin-top:6px;
+  border-radius:12px;
+  background:#020617;
+  border:1px solid #475569;
+  color:white;
+  font-size:14px;
+}
+
+textarea { height:75px; resize:none; }
+
+.preview {
+  width:150px;
+  height:150px;
+  margin-top:8px;
+  border-radius:12px;
+  object-fit:cover;
+  border:1px solid #475569;
+}
+
+/**********************
+  SAVE BUTTON
+**********************/
+.save-btn {
+  width:100%;
+  margin-top:22px;
+  padding:12px;
+  font-size:16px;
+  font-weight:bold;
+  border:none;
+  border-radius:999px;
+  background:linear-gradient(120deg, var(--primary), var(--secondary));
+  color:white;
+  cursor:pointer;
+  transition:0.2s ease;
+}
+
+.save-btn:hover {
+  transform:translateY(-2px);
+  box-shadow:0 12px 25px rgba(0,0,0,0.7);
+}
+</style>
+</head>
+
+<body>
+
+<video id="bg-video" autoplay muted loop>
+  <source src="/videos/hyd.mp4" type="video/mp4">
+</video>
+<div class="overlay"></div>
+
+<!-- ✅ NEW NAVBAR -->
+<div class="navbar">
+  <div class="nav-left">
+    <span>Edit Application</span>
+  </div>
+  <div class="nav-right">
+    <button onclick="location.href='/admin/dashboard.html'">Dashboard</button>
+    <button onclick="logout()">Logout</button>
+  </div>
+</div>
+
+<div class="wrapper">
+  <div class="card">
+
+    <h2>Edit Application</h2>
+    <p id="updatedText"></p>
+
+    <!-- FORM -->
+    <label>Name</label>
+    <input id="nameInput">
+
+    <label>Phone</label>
+    <input id="phoneInput">
+
+    <label>WhatsApp</label>
+    <input id="whatsappInput">
+
+    <label>Address</label>
+    <textarea id="addressInput"></textarea>
+
+    <label>Photo</label>
+    <img id="photoPreview" class="preview">
+    <input type="file" id="photoFile">
+
+    <label>Aadhar File</label>
+    <input type="file" id="aadharFile">
+
+    <!-- SUBMIT -->
+    <button class="save-btn" onclick="saveChanges()">Save Changes</button>
+
+  </div>
+</div>
+
+<script>
+const token = localStorage.getItem("token");
+if (!token) location.href = "/admin/login.html";
+
+const id = new URLSearchParams(location.search).get("id");
+
+const nameInput = document.getElementById("nameInput");
+const phoneInput = document.getElementById("phoneInput");
+const whatsappInput = document.getElementById("whatsappInput");
+const addressInput = document.getElementById("addressInput");
+const photoPreview = document.getElementById("photoPreview");
+const photoFile = document.getElementById("photoFile");
+const aadharFile = document.getElementById("aadharFile");
+const updatedText = document.getElementById("updatedText");
+
+function logout(){
+  localStorage.clear();
+  location.href="/admin/login.html";
+}
+
+/* LOAD DATA */
+async function load(){
+  try {
+    const res = await fetch(`/admin/application/${id}`, {
+      headers: { Authorization: "Bearer "+token }
+    });
+
+    if (!res.ok) throw new Error("Server returned error");
+
+    const data = await res.json();
+
+    if (!data.success || !data.application) {
+      alert("Invalid application ID!");
+      return;
+    }
+
+    const a = data.application;
+
+    nameInput.value = a.name || "";
+    phoneInput.value = a.phone || "";
+    whatsappInput.value = a.whatsapp || "";
+    addressInput.value = a.address || "";
+    photoPreview.src = a.photo || "/images/noimg.png";
+
+    updatedText.textContent =
+      "Last updated: " + new Date(a.updatedAt || a.createdAt).toLocaleString();
+
+  } catch (err) {
+    alert("Failed to load application.");
+  }
+}
+
+load();
+
+/* SAVE */
+async function saveChanges(){
+  try {
+    const body = {
+      name: nameInput.value.trim(),
+      phone: phoneInput.value.trim(),
+      whatsapp: whatsappInput.value.trim(),
+      address: addressInput.value.trim()
+    };
+
+    const res = await fetch(`/admin/application/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token
+      },
+      body: JSON.stringify(body)
+    });
+
+    const data = await res.json();
+    if (!data.success) {
+      alert("Failed to update details");
+      return;
+    }
+
+    const fd = new FormData();
+    if (photoFile.files.length) fd.append("photo", photoFile.files[0]);
+    if (aadharFile.files.length) fd.append("aadharFile", aadharFile.files[0]);
+
+    if (fd.entries().next().value) {
+      await fetch(`/admin/application/${id}/upload`, {
+        method: "POST",
+        headers: { Authorization: "Bearer " + token },
+        body: fd
+      });
+    }
+
+    alert("Updated Successfully!");
+    location.href = "/admin/dashboard.html";
+
+  } catch (err) {
+    alert("Unexpected error while saving.");
+  }
+}
+</script>
+
+</body>
+</html>

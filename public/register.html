@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Create Account - MahaLakshmi Portal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    :root {
+      --primary: #0d9488;
+      --secondary: #6366f1;
+      --card-bg: rgba(15,23,42,0.96);
+    }
+
+    * { box-sizing: border-box; }
+
+    /* 🔥 VIDEO BACKGROUND */
+    #bg-video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -2;
+    }
+
+    /* DARK OVERLAY */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: -1;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #020617, #020617 40%, #0b1120);
+      color: #e5e7eb;
+    }
+
+    .navbar {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      padding: 12px 22px;
+      background: linear-gradient(90deg, #0f766e, #4f46e5, #f97316);
+      background-size: 200% 200%;
+      animation: navMove 14s ease-in-out infinite;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.75);
+    }
+
+    @keyframes navMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #f9fafb;
+      font-weight: bold;
+      font-size: 18px;
+    }
+       .home-btn {
+      padding: 7px 14px;
+      background: rgba(15,23,42,0.2);
+      border: 1px solid rgba(248,250,252,0.7);
+      border-radius: 999px;
+      color: #f9fafb;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      backdrop-filter: blur(6px);
+      transition: 0.15s ease;
+    }
+
+    .home-btn:hover {
+      background: #f9fafb;
+      color: #0f172a;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(15,23,42,0.9);
+    }
+
+
+    .nav-right button {
+      margin-left: 8px;
+      padding: 7px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(248,250,252,0.7);
+      background: rgba(15,23,42,0.2);
+      color: #f9fafb;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: 0.15s ease;
+      backdrop-filter: blur(6px);
+    }
+
+    .nav-right button:hover {
+      background: #f9fafb;
+      color: #0f172a;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(15,23,42,0.9);
+    }
+
+    .wrapper {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-top: 90px;
+    }
+
+    .box {
+      position: relative;
+      width: 360px;
+      padding: 24px 24px 22px;
+      border-radius: 18px;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.8);
+      overflow: hidden;
+    }
+
+    .box::before {
+      content: "";
+      position: absolute;
+      inset: -2px;
+      border-radius: inherit;
+      background: conic-gradient(from 180deg,
+        rgba(56,189,248,0.7),
+        rgba(129,140,248,0.9),
+        rgba(249,115,22,0.8),
+        rgba(56,189,248,0.7)
+      );
+      animation: spin 10s linear infinite;
+      z-index: -1;
+    }
+
+    .box::after {
+      content: "";
+      position: absolute;
+      inset: 2px;
+      border-radius: inherit;
+      background: var(--card-bg);
+      z-index: -1;
+    }
+
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 12px;
+      color: #f9fafb;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #4b5563;
+      margin-top: 10px;
+      background: #020617;
+      color: #f9fafb;
+      font-size: 14px;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(45,212,191,0.4);
+    }
+
+    button[type="submit"] {
+      width: 100%;
+      margin-top: 16px;
+      padding: 10px;
+      background: linear-gradient(120deg, var(--primary), var(--secondary));
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: bold;
+      color: white;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      box-shadow: 0 12px 26px rgba(15,23,42,0.85);
+    }
+
+    button[type="submit"]:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 16px 36px rgba(15,23,42,0.9);
+    }
+
+    #message {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 13px;
+      color: #f97316;
+    }
+
+    .text {
+      margin-top: 8px;
+      text-align: center;
+      font-size: 13px;
+    }
+
+    .text a {
+      color: #38bdf8;
+      font-weight: bold;
+      text-decoration: none;
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- 🔥 VIDEO BACKGROUND -->
+<video id="bg-video" autoplay muted loop>
+  <source src="/videos/hyd.mp4" type="video/mp4">
+</video>
+
+<div class="overlay"></div>
+
+<div class="navbar">
+  <div class="nav-left">
+    <button class="home-btn" onclick="location.href='/index.html'">🏠Home</button>
+    <span>MahaLakshmi Portal</span>
+  </div>
+
+  <div class="nav-right">
+    <button onclick="location.href='/login.html'">Login</button>
+    <button id="registerActive" disabled>Register</button>
+    <button onclick="location.href='/admin/login.html'">Admin Login</button>
+    <button onclick="location.href='/admin/register.html'">Admin Register</button>
+
+    <button class="admin-panel-btn" id="adminPanelBtn" style="display:none;">Admin Panel</button>
+    <button class="profile-btn" id="profileBtn" style="display:none;">My Profile</button>
+    <button class="logout-btn" id="logoutBtn" style="display:none;">Logout</button>
+  </div>
+</div>
+
+<div class="wrapper">
+  <div class="box">
+    <h2>Create Account</h2>
+
+    <form id="registerForm">
+      <input type="text" id="name" placeholder="Full Name" required>
+      <input type="email" id="email" placeholder="Email" required>
+      <input type="password" id="password" placeholder="Password" required>
+
+      <button id="submit-btn" type="submit">Register</button>
+      <p id="message"></p>
+
+      <div class="text">
+        Already registered?
+        <a href="/login.html">Login</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="/js/auth.js"></script>
+<script>
+  const adminPanelBtn = document.getElementById("adminPanelBtn");
+  const profileBtn = document.getElementById("profileBtn");
+  const logoutBtn = document.getElementById("logoutBtn");
+  const loginBtnFake = document.getElementById("registerActive");
+
+  logoutBtn.onclick = () => {
+    auth.clearToken();
+    location.href = "/index.html";
+  };
+
+  async function setupNavbar() {
+    const role = await auth.getRole();
+    if (!role) return;
+
+    loginBtnFake.style.display = "none";
+
+    if (role === "admin") {
+      adminPanelBtn.style.display = "inline-block";
+      logoutBtn.style.display = "inline-block";
+    } else {
+      profileBtn.style.display = "inline-block";
+      logoutBtn.style.display = "inline-block";
+    }
+  }
+
+  setupNavbar();
+
+  document.getElementById("registerForm").addEventListener("submit", async function(e){
+    e.preventDefault();
+
+    const msg = document.getElementById("message");
+    msg.textContent = "";
+
+    try {
+      const name = document.getElementById("name").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+
+      const data = await auth.apiCall("/auth/signup", "POST", { name, email, password });
+      auth.saveToken(data.token);
+
+      msg.style.color = "#22c55e";
+      msg.textContent = "Account created! Redirecting...";
+
+      setTimeout(() => location.href = "/index.html", 900);
+
+    } catch (err) {
+      msg.textContent = err.message;
+    }
+  });
+</script>
+
+</body>
+</html>

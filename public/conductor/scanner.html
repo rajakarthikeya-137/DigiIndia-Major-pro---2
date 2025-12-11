@@ -1,0 +1,752 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Conductor Scanner - Smart Ticketing</title>
+  <script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
+
+  <style>
+    body {
+      margin:0;
+      background:#0f172a;
+      font-family:Arial, Helvetica, sans-serif;
+      color:#e5e7eb;
+      overflow-x:hidden;
+    }
+
+    /* NAVBAR */
+    .navbar {
+      position: fixed;
+      top:0; left:0;
+      width:100%;
+      padding:12px 22px;
+      background: linear-gradient(90deg, #0f766e, #4f46e5, #f97316);
+      background-size: 200% 200%;
+      animation: navMove 14s infinite;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      z-index:10;
+      box-shadow:0 10px 30px rgba(0,0,0,0.75);
+    }
+
+    @keyframes navMove {
+      0%{background-position:0% 50%;}
+      50%{background-position:100% 50%;}
+      100%{background-position:0% 50%;}
+    }
+
+    .nav-left {
+      display:flex;
+      align-items:center;
+      gap:10px;
+      color:#f9fafb;
+      font-weight:bold;
+      font-size:18px;
+    }
+
+    .home-btn {
+      padding:7px 14px;
+      background:rgba(15,23,42,0.2);
+      border:1px solid rgba(248,250,252,0.7);
+      border-radius:999px;
+      color:#f9fafb;
+      cursor:pointer;
+      font-size:13px;
+      font-weight:500;
+      backdrop-filter:blur(6px);
+      transition:0.15s ease;
+    }
+
+    .home-btn:hover {
+      background:#f9fafb;
+      color:#0f172a;
+      transform:translateY(-1px);
+      box-shadow:0 6px 18px rgba(15,23,42,0.9);
+    }
+
+    .nav-right button {
+      padding:7px 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,0.1);
+      border:1px solid rgba(255,255,255,0.4);
+      color:white;
+      cursor:pointer;
+      font-size:13px;
+      backdrop-filter:blur(6px);
+      transition:0.15s ease;
+    }
+
+    .nav-right button:hover {
+      background:#fff;
+      color:#0f172a;
+      transform:translateY(-2px);
+    }
+
+    /* MAIN */
+    .wrapper {
+      min-height:100vh;
+      padding:110px 16px 24px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:16px;
+      background: radial-gradient(circle at top, #020617, #020617 45%, #020617);
+    }
+
+    .phase {
+      display:none;
+      flex-direction:column;
+      gap:12px;
+      padding:16px;
+      border-radius:16px;
+      width:340px;
+      max-width:95%;
+    }
+
+    .phase.active { display:flex; }
+
+    h3 { text-align:center; margin-bottom:4px; color:#f9fafb; }
+
+    select,input,button {
+      padding:10px;
+      border-radius:8px;
+      border:1px solid #4b5563;
+      font-size:14px;
+      background:#020617;
+      color:#e5e7eb;
+    }
+
+    button {
+      background:#2563eb;
+      color:#fff;
+      border:none;
+      font-weight:bold;
+      cursor:pointer;
+    }
+
+    button:hover { background:#1d4ed8; }
+
+    #amount { width:100%; font-size:14px; }
+
+    .scanner-box {
+      position:relative;
+      width:100%;
+      height:380px;
+      background:#000;
+      border-radius:12px;
+      overflow:hidden;
+      border:1px solid #1f2937;
+    }
+
+    .scanner-box video { width:100%; height:100%; object-fit:cover; }
+
+    .cutout {
+      position:absolute;
+      top:25%; left:15%;
+      width:70%; height:40%;
+      border:2px solid #2563eb;
+      animation:glow 2s infinite alternate;
+      pointer-events:none;
+    }
+
+    @keyframes glow {
+      from{box-shadow:0 0 10px rgba(37,99,235,.6);}
+      to{box-shadow:0 0 25px rgba(37,99,235,.9);}
+    }
+
+    .scan-line {
+      position:absolute;
+      left:15%;
+      width:70%;
+      height:3px;
+      background:rgba(37,99,235,.95);
+      animation:scan 2.5s linear infinite;
+      pointer-events:none;
+    }
+
+    @keyframes scan {
+      0%{top:25%;}
+      100%{top:65%;}
+    }
+
+    .flash {
+      width:340px;
+      max-width:95%;
+      padding:8px 12px;
+      border-radius:8px;
+      font-size:13px;
+      background:rgba(15,23,42,0.95);
+      border:1px solid #38bdf8;
+      box-shadow:0 8px 20px rgba(0,0,0,0.6);
+      display:none;
+    }
+    .flash.info { border-color:#38bdf8; color:#e0f2fe; }
+    .flash.error { border-color:#f97373; color:#fecaca; }
+    .flash.success { border-color:#4ade80; color:#bbf7d0; }
+
+    .tracking-status {
+      font-size:13px;
+      text-align:center;
+      margin-top:-4px;
+      color:#38bdf8;
+    }
+
+    .ticket-box-wrapper {
+      position: relative;
+      width: 100%;
+      background: transparent;
+      border-radius: 18px;
+      padding: 2px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .ticket-box-wrapper::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 18px;
+      background: conic-gradient(
+        from 180deg,
+        rgba(56,189,248,0.8),
+        rgba(129,140,248,1),
+        rgba(249,115,22,0.9),
+        rgba(56,189,248,0.8)
+      );
+      animation: spinGlow 8s linear infinite;
+      z-index: -1;
+    }
+
+    @keyframes spinGlow {
+      100% { transform: rotate(360deg); }
+    }
+
+    .ticket-box {
+      background: rgba(15,23,42,0.96);
+      border-radius: 16px;
+      padding: 16px;
+      color:#f1f5f9;
+      text-align:center;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.65);
+    }
+
+    .small {
+      font-size:12px;
+      padding:8px;
+    }
+
+    .row {
+      display:flex;
+      gap:8px;
+      align-items:center;
+    }
+
+    .muted { color:#9ca3af; font-size:13px; }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<div class="navbar">
+  <div class="nav-left">
+    <button class="home-btn" onclick="location.href='/conductor/dashboard.html'">⬅ Dashboard</button>
+    <span>Conductor Scanner</span>
+  </div>
+  <div class="nav-right">
+    <button onclick="logout()">Logout</button>
+  </div>
+</div>
+
+<div class="wrapper">
+
+  <div id="flash" class="flash info"></div>
+
+  <!-- PHASE 1 -->
+  <div id="phase1" class="phase active">
+    <h3>🎫 Book Ticket</h3>
+
+    <input type="text" id="busNo" placeholder="Enter Bus Number">
+    <input type="date" id="journeyDate">
+
+    <!-- AUTO TRACKING STATUS -->
+    <div class="row">
+      <div id="trackingStatus" class="tracking-status">📡 Auto-tracking inactive</div>
+      <button id="toggleTrackBtn" style="margin-left:auto;padding:8px 10px;" class="small">Enable Tracking</button>
+    </div>
+
+    <select id="source">
+      <option value="">Select Source</option>
+      <option>Belagavi</option>
+      <option>Khanapur</option>
+      <option>Londa</option>
+      <option>Karwar</option>
+      <option>Ankola</option>
+      <option>Gokarna</option>
+    </select>
+
+    <select id="destination">
+      <option value="">Select Destination</option>
+      <option>Belagavi</option>
+      <option>Khanapur</option>
+      <option>Londa</option>
+      <option>Karwar</option>
+      <option>Ankola</option>
+      <option>Gokarna</option>
+    </select>
+
+    <select id="paymentType">
+      <option value="">Select Payment</option>
+      <option value="FREE">Free</option>
+      <option value="PAID">Paid</option>
+    </select>
+
+    <input type="number" id="amount" placeholder="Enter Amount" style="display:none;">
+    <button id="continueBtn">Continue</button>
+  </div>
+
+  <!-- PHASE 2 -->
+  <div id="phase2" class="phase">
+    <h3>📷 Scan Pass QR</h3>
+
+    <div class="scanner-box">
+      <video id="video" autoplay muted playsinline></video>
+      <div class="cutout"></div>
+      <div class="scan-line"></div>
+    </div>
+
+    <div id="scanStatus" class="muted">⚠️ Waiting for QR...</div>
+    <canvas id="preview" style="display:none;"></canvas>
+
+    <div class="row" style="justify-content:space-between;">
+      <button id="backBtn">Back</button>
+      <button id="scanNowBtn" style="background:#10b981;">Scan Now</button>
+    </div>
+  </div>
+
+  <!-- PHASE 3 -->
+  <div id="phase3" class="phase">
+    <h3>🎟️ Ticket Preview</h3>
+
+    <div class="ticket-box-wrapper">
+      <div class="ticket-box" id="ticketBox"></div>
+    </div>
+
+    <button id="confirmBtn">Confirm & Book</button>
+    <button id="newBtn" style="margin-top:8px;background:#334155;">New Ticket</button>
+  </div>
+
+</div>
+
+<script>
+/* ---------- Authorization check & helpers ---------- */
+function getTokenFromStorage() {
+  return localStorage.getItem("conductorToken");
+}
+const conductorToken = getTokenFromStorage();
+if (!conductorToken) location.href = "/conductor/login.html";
+
+function setFlash(msg = "", type = "info", timeout = 3500) {
+  const el = document.getElementById("flash");
+  if (!msg) {
+    el.style.display = "none";
+    return;
+  }
+  el.textContent = msg;
+  el.className = "flash " + type;
+  el.style.display = "block";
+  if (timeout > 0) setTimeout(() => el.style.display = "none", timeout);
+}
+
+/* ---------- Elements ---------- */
+const video = document.getElementById("video");
+const preview = document.getElementById("preview");
+const scanStatus = document.getElementById("scanStatus");
+const toggleTrackBtn = document.getElementById("toggleTrackBtn");
+const trackingStatusEl = document.getElementById("trackingStatus");
+
+const continueBtn = document.getElementById("continueBtn");
+const backBtn = document.getElementById("backBtn");
+const scanNowBtn = document.getElementById("scanNowBtn");
+const confirmBtn = document.getElementById("confirmBtn");
+const newBtn = document.getElementById("newBtn");
+
+/* ---------- State ---------- */
+let stream = null;
+let scanInterval = null;
+let autoTrackInterval = null;
+let autoBusNo = localStorage.getItem("lastBusSet") || null;
+
+let isTrackingEnabled = (localStorage.getItem("trackingEnabled") === "true");
+
+let journeyData = {};
+let applicantData = null;
+
+/* ---------- UI state restore ---------- */
+function updateTrackingUI() {
+  if (isTrackingEnabled && autoTrackInterval) {
+    trackingStatusEl.textContent = "📡 GPS Tracking Active";
+    toggleTrackBtn.textContent = "Disable Tracking";
+    toggleTrackBtn.style.background = "#ef4444";
+  } else if (isTrackingEnabled) {
+    trackingStatusEl.textContent = "📡 GPS Enabled (waiting for bus)";
+    toggleTrackBtn.textContent = "Disable Tracking";
+    toggleTrackBtn.style.background = "#ef4444";
+  } else {
+    trackingStatusEl.textContent = "📡 Auto-tracking inactive";
+    toggleTrackBtn.textContent = "Enable Tracking";
+    toggleTrackBtn.style.background = "#10b981";
+  }
+}
+updateTrackingUI();
+
+/* ---------- Camera & scanner ---------- */
+async function startCamera() {
+  if (stream) return;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+    video.srcObject = stream;
+    scanStatus.textContent = "📷 Point camera at QR...";
+    startAutoScan();
+  } catch (e) {
+    console.error("Camera error:", e);
+    setFlash("Camera access denied or unavailable.", "error", 6000);
+    scanStatus.textContent = "❌ Camera error";
+  }
+}
+
+function stopCamera() {
+  if (scanInterval) { clearInterval(scanInterval); scanInterval = null; }
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+  video.srcObject = null;
+}
+
+function startAutoScan() {
+  const ctx = preview.getContext("2d");
+  scanInterval = setInterval(() => {
+    if (!video || video.readyState !== video.HAVE_ENOUGH_DATA) return;
+    preview.width = video.videoWidth;
+    preview.height = video.videoHeight;
+    ctx.drawImage(video, 0, 0, preview.width, preview.height);
+    const img = ctx.getImageData(0, 0, preview.width, preview.height);
+    const qr = jsQR(img.data, preview.width, preview.height);
+    if (qr && qr.data) {
+      stopCamera();
+      scanStatus.textContent = "⏳ Fetching pass...";
+      fetchApplicant(qr.data);
+    }
+  }, 300);
+}
+
+function manualScanOnce() {
+  if (!video || video.readyState !== video.HAVE_ENOUGH_DATA) {
+    setFlash("Camera not ready.", "error");
+    return;
+  }
+  const ctx = preview.getContext("2d");
+  preview.width = video.videoWidth;
+  preview.height = video.videoHeight;
+  ctx.drawImage(video, 0, 0, preview.width, preview.height);
+  const img = ctx.getImageData(0, 0, preview.width, preview.height);
+  const qr = jsQR(img.data, preview.width, preview.height);
+  if (qr && qr.data) {
+    stopCamera();
+    scanStatus.textContent = "⏳ Fetching pass...";
+    fetchApplicant(qr.data);
+  } else {
+    setFlash("QR not found. Try again.", "error");
+  }
+}
+
+/* ---------- Fetch pass data ---------- */
+async function fetchApplicant(passId) {
+  try {
+    const res = await fetch(`/getApplicant/${encodeURIComponent(passId)}`, {
+      headers: { "Authorization": "Bearer " + conductorToken }
+    });
+
+    if (!res.ok) {
+      setFlash("Pass not found.", "error");
+      scanStatus.textContent = "❌ Invalid QR";
+      return;
+    }
+
+    const json = await res.json();
+    if (!json || !json.passId) {
+      setFlash("Invalid pass data.", "error");
+      scanStatus.textContent = "❌ Invalid pass";
+      return;
+    }
+
+    applicantData = json;
+    loadPreview();
+    showPhase(3);
+    setFlash("Pass loaded.", "success");
+  } catch (err) {
+    console.error("fetchApplicant error:", err);
+    setFlash("Server error while fetching pass.", "error");
+    scanStatus.textContent = "❌ Error";
+  }
+}
+
+/* ---------- Ticket preview & booking ---------- */
+function escapeHtml(s) {
+  return String(s || "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
+}
+
+function loadPreview() {
+  const p = applicantData || {};
+  document.getElementById("ticketBox").innerHTML = `
+    <p><b>${escapeHtml(p.name || "Unknown")}</b></p>
+    <p class="muted">Phone: ${escapeHtml(p.phone || "-")}</p>
+    <p class="muted">Pass ID: <b>${escapeHtml(p.passId || p._id || "-")}</b></p>
+    ${p.photo ? `<img src="${escapeHtml(p.photo)}" style="width:90px;height:90px;border-radius:6px;margin-top:8px;">` : ""}
+    <p>From: ${escapeHtml(journeyData.source || "-")}</p>
+    <p>To: ${escapeHtml(journeyData.destination || "-")}</p>
+    <p>${escapeHtml(journeyData.paymentType || "-")} ${journeyData.amount ? "₹" + journeyData.amount : ""}</p>
+  `;
+}
+
+async function confirmTicket() {
+  if (!applicantData || !journeyData || !journeyData.busNo) {
+    setFlash("Missing data for booking.", "error");
+    return;
+  }
+
+  try {
+    const body = {
+      applicantId: applicantData._id || applicantData.passId,
+      busNo: journeyData.busNo,
+      journeyDate: journeyData.journeyDate,
+      source: journeyData.source,
+      destination: journeyData.destination,
+      paymentType: journeyData.paymentType,
+      amount: journeyData.amount
+    };
+
+    const res = await fetch("/bookTicket", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + conductorToken
+      },
+      body: JSON.stringify(body)
+    });
+
+    const data = await res.json();
+
+    if (data && data.success) {
+      setFlash("🎉 Ticket booked!", "success", 5000);
+      resetFlow();
+    } else {
+      setFlash((data && data.msg) || "Booking failed.", "error", 6000);
+    }
+  } catch (err) {
+    console.error("Booking error:", err);
+    setFlash("Booking error occurred.", "error", 6000);
+  }
+}
+
+/* ---------- Flow helpers ---------- */
+function showPhase(n) {
+  document.querySelectorAll(".phase").forEach(p => p.classList.remove("active"));
+  document.getElementById("phase" + n).classList.add("active");
+}
+function resetFlow() {
+  stopCamera();
+  applicantData = null;
+  journeyData = {};
+  document.getElementById("amount").value = "";
+  scanStatus.textContent = "⚠️ Waiting...";
+  showPhase(1);
+}
+
+/* ---------- Continue -> set bus and optionally start tracking ---------- */
+async function handleContinue() {
+  const s = document.getElementById("source").value;
+  const d = document.getElementById("destination").value;
+  const p = document.getElementById("paymentType").value;
+  const bus = document.getElementById("busNo").value.trim();
+  const date = document.getElementById("journeyDate").value;
+
+  if(!bus || !date) return setFlash("Enter bus number & date.","error");
+  if(!s || !d || !p) return setFlash("Fill all fields.","error");
+  if(p==="PAID" && !document.getElementById("amount").value)
+    return setFlash("Enter amount.","error");
+
+  try {
+    const res = await fetch("/conductor/setBus", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + conductorToken
+      },
+      body: JSON.stringify({ busNo: bus })
+    });
+
+    const data = await res.json();
+    if (!data || !data.success) {
+      setFlash((data && data.msg) || "Failed to set bus on server.", "error");
+      return;
+    }
+
+    journeyData = {
+      busNo: bus,
+      journeyDate: date,
+      source: s,
+      destination: d,
+      paymentType: p,
+      amount: p==="PAID"? Number(document.getElementById("amount").value) : 0
+    };
+
+    // set autoBusNo for tracking and persist
+    autoBusNo = bus;
+    localStorage.setItem("lastBusSet", bus);
+
+    // If server says trackingEnabled true, keep local storage consistent
+    if (data.trackingEnabled === true) {
+      isTrackingEnabled = true;
+      localStorage.setItem("trackingEnabled", "true");
+    }
+
+    setFlash("", "info", 0);
+    showPhase(2);
+    startCamera();
+
+    // start tracking if enabled
+    if (isTrackingEnabled) startAutoTracking();
+
+    updateTrackingUI();
+
+  } catch (err) {
+    console.error("setBus error:", err);
+    setFlash("Server error while setting bus.", "error");
+  }
+}
+
+/* ---------- Payment amount toggle ---------- */
+document.getElementById("paymentType").addEventListener("change", e=>{
+  document.getElementById("amount").style.display = e.target.value==="PAID" ? "block" : "none";
+});
+
+/* ---------- GPS tracking ---------- */
+function toggleTracking() {
+  isTrackingEnabled = !isTrackingEnabled;
+  localStorage.setItem("trackingEnabled", isTrackingEnabled ? "true" : "false");
+  updateTrackingUI();
+
+  if (!isTrackingEnabled) {
+    // inform server
+    fetch("/disableTracking", {
+      method: "POST",
+      headers: { "Authorization": "Bearer " + conductorToken, "Content-Type": "application/json" }
+    }).catch(e=>console.error("disableTracking error", e));
+    stopAutoTracking();
+  } else {
+    // start if bus set
+    if (autoBusNo) {
+      startAutoTracking();
+    } else {
+      setFlash("Tracking enabled but bus not set. Enter bus and press Continue.", "info", 6000);
+    }
+  }
+}
+
+function startAutoTracking() {
+  if (!isTrackingEnabled) return;
+  if (!autoBusNo) {
+    setFlash("Bus not set. Tracking will start after you set the bus.", "error");
+    return;
+  }
+
+  if (!navigator.geolocation) {
+    setFlash("GPS not supported by this device.", "error");
+    return;
+  }
+
+  // initial position to trigger permission prompt if needed
+  navigator.geolocation.getCurrentPosition(
+    pos => sendAutoLocation(pos.coords.latitude, pos.coords.longitude),
+    err => {
+      console.error("GPS permission error:", err);
+      setFlash("GPS permission denied or unavailable.", "error");
+    },
+    { enableHighAccuracy: true, maximumAge: 30000 }
+  );
+
+  // periodic updates
+  if (autoTrackInterval) clearInterval(autoTrackInterval);
+  autoTrackInterval = setInterval(() => {
+    navigator.geolocation.getCurrentPosition(
+      p => sendAutoLocation(p.coords.latitude, p.coords.longitude),
+      err => console.log("GPS periodic error:", err),
+      { enableHighAccuracy: true, maximumAge: 30000 }
+    );
+  }, 5000);
+
+  updateTrackingUI();
+}
+
+async function sendAutoLocation(lat, lng) {
+  if (!autoBusNo) return;
+  try {
+    await fetch("/updateLocation", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + conductorToken
+      },
+      body: JSON.stringify({ busNo: autoBusNo, lat, lng })
+    });
+
+    trackingStatusEl.textContent = `📍 Live Location: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+  } catch (err) {
+    console.error("Location update failed:", err);
+    trackingStatusEl.textContent = "⚠️ Location update failed";
+  }
+}
+
+async function stopAutoTracking() {
+  if (autoTrackInterval) { clearInterval(autoTrackInterval); autoTrackInterval = null; }
+  try {
+    await fetch("/disableTracking", {
+      method: "POST",
+      headers: { "Authorization": "Bearer " + conductorToken, "Content-Type": "application/json" }
+    });
+  } catch (e) {
+    console.error("Stop tracking error:", e);
+  } finally {
+    updateTrackingUI();
+    trackingStatusEl.textContent = "📡 Auto-tracking inactive";
+  }
+}
+
+/* ---------- UI Binding ---------- */
+toggleTrackBtn.addEventListener("click", toggleTracking);
+continueBtn.addEventListener("click", handleContinue);
+backBtn.addEventListener("click", () => { stopCamera(); showPhase(1); });
+scanNowBtn.addEventListener("click", manualScanOnce);
+confirmBtn.addEventListener("click", confirmTicket);
+newBtn.addEventListener("click", resetFlow);
+
+/* ---------- Auto-start if login allowed tracking and bus set ---------- */
+window.addEventListener("load", () => {
+  // restore UI
+  updateTrackingUI();
+
+  // if tracking was enabled at login & bus remembered -> start
+  if (isTrackingEnabled && autoBusNo) {
+    startAutoTracking();
+  }
+});
+
+/* ---------- Clean up on exit ---------- */
+window.addEventListener("beforeunload", () => {
+  stopCamera();
+  if (autoTrackInterval) clearInterval(autoTrackInterval);
+});
+</script>
+
+</body>
+</html>
