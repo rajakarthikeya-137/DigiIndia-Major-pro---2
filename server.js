@@ -16,13 +16,23 @@ const app = express();
    ROUTE NODES FOR SEAT CALCULATION
 ---------------------------------------------------------- */
 const ROUTE_STOPS = [
-  "Belagavi",
-  "Khanapur",
-  "Londa",
-  "Karwar",
-  "Ankola",
-  "Gokarna",
+  "Ameerpet",
+  "Miyapur",
+  "Kukatpally",
+  "Hitech City",
+  "Madhapur",
+  "Gachibowli",
+  "Jubilee Hills",
+  "Banjara Hills",
+  "Begumpet",
+  "Secunderabad",
+  "Uppal",
+  "LB Nagar",
+  "Dilsukhnagar",
+  "Mehdipatnam",
+  "Charminar",
 ];
+
 
 function stopIndex(name) {
   return ROUTE_STOPS.indexOf(name);
