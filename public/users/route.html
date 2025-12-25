@@ -181,11 +181,23 @@
 <div class="map-card">
   <div id="map"></div>
 </div>
+<script>
+async function loadMapboxToken() {
+  const res = await fetch("/config");
+  const cfg = await res.json();
+
+  if (!cfg.mapboxToken) {
+    alert("❌ Mapbox token missing. Contact admin.");
+    return false;
+  }
+
+  mapboxgl.accessToken = String(cfg.mapboxToken).trim();
+  return true;
+}
+</script>
+
 
 <script>
-mapboxgl.accessToken =
-"pk.eyJ1IjoicmFtMDkwOTAiLCJhIjoiY21pd3h1cGlmMDB2djNjcjB3cWU0dTdnNyJ9.mG2bnAWtLI-pZCPcKko_WQ";
-
 const url = new URL(window.location.href);
 const source = url.searchParams.get("source");
 const destination = url.searchParams.get("destination");
@@ -195,12 +207,24 @@ document.getElementById("tripInfo").textContent =
   `🚌 Bus ${busNo} — ${source} → ${destination}`;
 
 /* LIGHT MODE MAP */
-const map = new mapboxgl.Map({
-  container: "map",
-  style: "mapbox://styles/mapbox/streets-v12", // <-- CHANGE THIS
-  zoom: 10,
-  center: [74.5, 15.8]
-});
+let map = null;
+
+(async () => {
+  const ok = await loadMapboxToken();
+  if (!ok) return;
+
+  map = new mapboxgl.Map({
+    container: "map",
+    style: "mapbox://styles/mapbox/streets-v12",
+    zoom: 10,
+    center: [74.5, 15.8]
+  });
+
+  map.on("load", () => {
+    drawRoute();
+    setInterval(pollBus, 2000);
+  });
+})();
 
 let busMarker = null;
 
@@ -293,10 +317,7 @@ async function pollBus() {
   }
 }
 
-map.on("load", () => {
-  drawRoute();
-  setInterval(pollBus, 2000);
-});
+
 </script>
 
 </body>
