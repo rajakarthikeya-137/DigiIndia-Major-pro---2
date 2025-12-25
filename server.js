@@ -33,6 +33,25 @@ const ROUTE_STOPS = [
   "Charminar",
 ];
 
+const SMARTMOVE_SYSTEM_PROMPT = `
+You are SmartMove Bharat AI Assistant.
+
+SmartMove Bharat is a gender-neutral, AI-powered smart public transport
+and ticketing system developed as a step toward Digital India.
+
+Your job:
+- Explain how SmartMove Bharat works
+- Guide users to book tickets
+- Help with travel passes, QR verification, live bus tracking
+- Assist passengers, conductors, and admins
+- Be polite, clear, and project-aware
+
+Rules:
+- Never mention code, APIs, or backend
+- Never assume user gender
+- Always answer in the context of SmartMove Bharat
+`;
+
 
 function stopIndex(name) {
   return ROUTE_STOPS.indexOf(name);
@@ -1511,7 +1530,6 @@ app.get("/config", (req, res) => {
 });
 
 
-
 const { GoogleGenAI } = require("@google/genai");
 
 const ai = new GoogleGenAI({
@@ -1558,7 +1576,6 @@ app.post("/api/gemini/analyze", async (req, res) => {
 });
 
 
-
 /* ----------------------------------------------------------   
    START SERVER
 ---------------------------------------------------------- */
@@ -1567,4 +1584,3 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
-
