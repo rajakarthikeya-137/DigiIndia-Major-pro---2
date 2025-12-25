@@ -241,11 +241,7 @@
 
   <div id="map"></div>
 </div>
-
 <script>
-mapboxgl.accessToken =
-"pk.eyJ1IjoicmFtMDkwOTAiLCJhIjoiY21pd3h1cGlmMDB2djNjcjB3cWU0dTdnNyJ9.mG2bnAWtLI-pZCPcKko_WQ";
-
 function setFlash(msg, type = "info") {
   const el = document.getElementById("flash");
   if (!msg) {
@@ -256,6 +252,37 @@ function setFlash(msg, type = "info") {
   el.className = "flash " + type;
   el.style.display = "block";
 }
+</script>
+
+<script>
+function initMap() {
+  map = new mapboxgl.Map({
+    container: "map",
+    style: "mapbox://styles/mapbox/streets-v12",
+    center: [78.4867, 17.3850],
+    zoom: 12
+  });
+}
+
+</script>
+
+<script>
+(async function initConfigAndMap() {
+  try {
+    const res = await fetch("/config");
+    const cfg = await res.json();
+
+    if (!cfg.mapboxToken) {
+      setFlash("Map configuration missing. Contact admin.", "error");
+      return;
+    }
+
+mapboxgl.accessToken = String(cfg.mapboxToken || "").trim();
+    initMap(); // start map ONLY after token is set
+  } catch (e) {
+    setFlash("Failed to load map configuration.", "error");
+  }
+})();
 
 let selectedBus = null;
 let pollInterval = null;
@@ -278,12 +305,6 @@ function haversineKm(lat1, lon1, lat2, lon2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
-const map = new mapboxgl.Map({
-  container: "map",
-  style: "mapbox://styles/mapbox/streets-v12",
-  center: [78.4867, 17.3850],
-  zoom: 12
-});
 
 /* STOP POLLING */
 function stopPolling() {
