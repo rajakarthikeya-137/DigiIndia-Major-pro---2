@@ -1511,6 +1511,54 @@ app.get("/config", (req, res) => {
 });
 
 
+
+const { GoogleGenAI } = require("@google/genai");
+
+const ai = new GoogleGenAI({
+  apiKey: process.env.GEMINI_API_KEY
+});
+
+app.post("/api/gemini/analyze", async (req, res) => {
+  try {
+    const { text } = req.body;
+
+    if (!text) {
+      return res.status(400).json({
+        success: false,
+        message: "Message required"
+      });
+    }
+
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: [
+        {
+          role: "user",
+          parts: [
+            {
+              text: `${SMARTMOVE_SYSTEM_PROMPT}\n\nUser Question:\n${text}`
+            }
+          ]
+        }
+      ]
+    });
+
+    res.json({
+      success: true,
+      response: response.text
+    });
+
+  } catch (err) {
+    console.error("🔥 GEMINI ERROR:", err);
+    res.status(500).json({
+      success: false,
+      message: "SmartMove Bharat AI is currently unavailable"
+    });
+  }
+});
+
+
+
 /* ----------------------------------------------------------   
    START SERVER
 ---------------------------------------------------------- */
@@ -1519,3 +1567,4 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
+
