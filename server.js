@@ -127,12 +127,10 @@ return {
 ---------------------------------------------------------- */
 app.use(
   cors({
-    origin: "*",
-    methods: "*",
-    allowedHeaders: "*",
+    origin: true,
+    credentials: true
   })
 );
-
 
 
 app.use(express.json());
@@ -1491,6 +1489,15 @@ app.post("/bus/updateCount", ensureDB, conductorAuth, async (req, res) => {
     console.error(err);
     res.json({ success: false, msg: err.message });
   }
+});
+
+// ----------------------------------------------------------
+// ⭐ PUBLIC CONFIG (Frontend-safe)
+// ----------------------------------------------------------
+app.get("/config", (req, res) => {
+  res.json({
+    mapboxToken: process.env.MAPBOX_TOKEN || ""
+  });
 });
 
 
