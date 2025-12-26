@@ -193,6 +193,74 @@
     transform-origin: 50% 50%;
     transition: transform 0.25s linear;
   }
+  /* ---------- PERMANENT MOBILE NAV LOCK ---------- */
+@media (max-width: 768px) {
+  /* Force Navbar to stay slim and fixed at the top */
+  .navbar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    height: 50px !important;
+    padding: 0 10px !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 5px !important;
+    z-index: 1000 !important;
+  }
+
+  /* Hide the long text to prevent the bar from expanding */
+  .nav-left span { display: none !important; }
+
+  /* Shrink buttons to tiny pills */
+  .home-btn, #searchBtn {
+    height: 28px !important;
+    padding: 0 10px !important;
+    font-size: 11px !important;
+    border-radius: 999px !important;
+    white-space: nowrap !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  /* Shrink search input */
+  #searchBox {
+    height: 28px !important;
+    width: 120px !important;
+    font-size: 11px !important;
+    padding: 0 8px !important;
+    border-radius: 6px !important;
+    margin: 0 !important;
+  }
+
+  /* LOCK THE MAP POSITION UNDER THE NAV */
+  .wrapper {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  #map {
+    position: absolute !important;
+    top: 50px !important; /* Starts right at the bottom of the 50px nav */
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: calc(100vh - 50px) !important;
+    width: 100% !important;
+    margin: 0 !important;
+  }
+
+  /* Keep bottom panels from pushing things */
+  #busInfoPanel {
+    position: absolute !important;
+    bottom: 30px !important;
+    left: 10px !important;
+    right: 10px !important;
+    z-index: 100 !important;
+  }
+}
 </style>
 </head>
 
@@ -434,4 +502,3 @@ async function updateBus() {
 
 </body>
 </html>
-
