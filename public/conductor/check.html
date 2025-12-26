@@ -202,6 +202,63 @@
       margin-bottom:10px;
       box-shadow:0 0 12px rgba(56,189,248,0.7);
     }
+    /* ---------- MOBILE FIX: ADJUSTED CENTER TITLE ---------- */
+
+@media (max-width: 480px) {
+    .navbar {
+        padding: 0 10px;
+        height: 50px;
+        position: relative;
+    }
+
+    .nav-left {
+        z-index: 2;
+    }
+
+    /* Adjusted translate from -50% to -60% to shift it slightly left */
+    .nav-left span {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-60%, -50%); 
+        font-size: 12px;
+        white-space: nowrap;
+        pointer-events: none;
+        font-weight: bold;
+    }
+
+    .home-btn, .nav-right button {
+        padding: 5px 8px;
+        font-size: 10px;
+        margin-left: 2px;
+    }
+
+    .wrapper {
+        padding-top: 80px;
+    }
+
+    h2 {
+        font-size: 16px;
+        text-align: center;
+        padding: 0 10px;
+    }
+
+    .scanner-box {
+        width: 300px;
+        height: 300px; /* Slightly shorter to avoid scrolling */
+    }
+
+    .ticket-wrapper {
+        width: 310px; 
+        max-width: 95%;
+        padding: 15px;
+    }
+
+    .ticket-box img {
+        width: 80px;
+        height: 80px;
+    }
+}
   </style>
 </head>
 
@@ -257,14 +314,26 @@ let scanStatus = document.getElementById("scanStatus");
 let stream, scanLoop;
 
 async function startCamera() {
+
+  // 🔴 ISSUE 1 FIX — camera support check
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    alert("Camera not supported on this device.");
+    return;
+  }
+
   try {
-    stream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:"environment" } });
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "environment" }
+    });
+
     video.srcObject = stream;
     autoScan();
+
   } catch (err) {
-    alert("Camera not accessible");
+    alert("Camera permission denied or unavailable.");
   }
 }
+
 
 function autoScan() {
   const ctx = preview.getContext("2d");
@@ -333,6 +402,15 @@ function showTicket(a, t) {
 }
 
 startCamera();
+// 🔴 ISSUE 2 FIX — stop camera when leaving page
+window.addEventListener("pagehide", () => {
+  if (stream) stream.getTracks().forEach(t => t.stop());
+});
+
+window.addEventListener("beforeunload", () => {
+  if (stream) stream.getTracks().forEach(t => t.stop());
+});
+
 </script>
 
 </body>
