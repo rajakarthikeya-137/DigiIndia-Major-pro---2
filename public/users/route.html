@@ -158,6 +158,77 @@
     height: calc(100vh - 90px);
     border-radius: 1rem;
   }
+  /* ---------- SLIM MOBILE ROUTE VIEW ---------- */
+@media (max-width: 768px) {
+  /* 1. Reset Body for App-like feel */
+  body {
+    overflow: hidden !important;
+    background: #f8fafc !important; /* Clean light mode */
+  }
+  #bg-video, .overlay { display: none !important; }
+
+  /* 2. Slim Pill Navbar */
+  .navbar {
+    height: 50px !important;
+    padding: 0 10px !important;
+    position: fixed !important;
+    top: 0 !important;
+    gap: 8px !important;
+  }
+
+  .home-btn {
+    height: 28px !important;
+    padding: 0 12px !important;
+    font-size: 11px !important;
+    border-radius: 999px !important;
+    display: flex;
+    align-items: center;
+  }
+
+  .nav-title {
+    font-size: 14px !important;
+    white-space: nowrap;
+  }
+
+  /* 3. Trip Info Bar (Sub-header) */
+  .top-bar {
+    margin-top: 50px !important; /* Exactly under nav */
+    padding: 8px 12px !important;
+    font-size: 11px !important;
+    font-weight: bold;
+    height: 35px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid rgba(0,0,0,0.1) !important;
+  }
+
+  /* 4. Map-Card Override (Kill the "Big" Glow on mobile) */
+  .map-card {
+    width: 100% !important;
+    height: calc(100vh - 85px) !important; /* Fill remaining space */
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    border: none !important;
+  }
+
+  .map-card::before, .map-card::after {
+    display: none !important; /* Removes the spinning glow to save space */
+  }
+
+  /* 5. Force Map to Fill */
+  #map {
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 0 !important;
+  }
+
+  /* Adjust Marker scale */
+  .mapboxgl-marker {
+    scale: 0.8;
+  }
+}
 
 </style>
 </head>
@@ -323,5 +394,3 @@ async function pollBus() {
 
 </body>
 </html>
-
-
