@@ -217,6 +217,172 @@
       font-weight: bold;
       text-decoration: none;
     }
+    /* =====================================================
+   MOBILE-FIRST MEDIA QUERIES
+   Target: Android phones & up
+   ===================================================== */
+
+/* -----------------------------------------------------
+   SMALL AND NORMAL MOBILE PHONES (≤ 360px)
+   ----------------------------------------------------- */
+@media (max-width: 360px) {
+
+  .navbar {
+    padding: 10px 14px;
+  }
+
+  .nav-left span {
+    font-size: 14px;
+  }
+
+  .nav-right button {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  .box {
+    width: 92%;
+    padding: 20px 16px;
+  }
+
+  h2 {
+    font-size: 18px;
+  }
+
+  input {
+    font-size: 16px; /* prevent Android zoom */
+  }
+}
+
+/* -----------------------------------------------------
+   STANDARD ANDROID PHONES (361px – 430px)
+   ----------------------------------------------------- */
+@media (min-width: 361px) and (max-width: 430px) {
+
+  .navbar {
+    padding: 12px 16px;
+  }
+
+  .nav-left span {
+    font-size: 15px;
+  }
+
+  .nav-right button {
+    font-size: 12px;
+    padding: 7px 12px;
+  }
+
+  .box {
+    width: 340px;
+  }
+
+  input {
+    font-size: 16px; /* critical for Android */
+  }
+}
+
+/* -----------------------------------------------------
+   LARGE PHONES / SMALL TABLETS (431px – 767px)
+   ----------------------------------------------------- */
+@media (min-width: 431px) and (max-width: 767px) {
+
+  .box {
+    width: 380px;
+  }
+
+  .nav-left span {
+    font-size: 16px;
+  }
+
+  .nav-right button {
+    font-size: 13px;
+  }
+}
+
+
+/* =====================================================
+   PROFESSIONAL MOBILE NAVBAR (LOGIN PAGE)
+   ===================================================== */
+@media (max-width: 430px) {
+
+  /* Compact app-style header */
+  .navbar {
+    height: 56px;
+    padding: 0 14px;
+    flex-direction: row;
+    justify-content: center;
+  }
+
+  /* Center title */
+  .nav-left {
+    gap: 8px;
+    font-size: 15px;
+  }
+
+  .nav-left span {
+    font-size: 15px;
+    white-space: nowrap;
+  }
+
+  /* Keep home, hide clutter */
+  .nav-right {
+    display: none;
+  }
+
+  /* Optional: keep home button smaller */
+  .home-btn {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  /* Fix layout spacing */
+  .wrapper {
+    padding-top: 90px;
+  }
+}
+
+
+
+/* -----------------------------------------------------
+   TABLETS (≥ 768px)
+   ----------------------------------------------------- */
+@media (min-width: 768px) {
+
+  .wrapper {
+    padding-top: 120px;
+  }
+
+  .box {
+    width: 420px;
+  }
+
+  h2 {
+    font-size: 22px;
+  }
+
+  input {
+    font-size: 15px;
+  }
+}
+
+/* -----------------------------------------------------
+   DESKTOP / LAPTOP (≥ 1024px)
+   ----------------------------------------------------- */
+@media (min-width: 1024px) {
+
+  .navbar {
+    padding: 14px 36px;
+  }
+
+  .nav-left span {
+    font-size: 18px;
+  }
+
+  .box {
+    width: 440px;
+  }
+}
+
   </style>
 </head>
 
