@@ -232,6 +232,134 @@
         }
 
         .msg { text-align: center; margin-top: 10px; color: red; }
+        /* --- MOBILE OPTIMIZATION: CAPSULE NAV & COMPACT CARD --- */
+@media (max-width: 768px) {
+  /* 1. Navbar: Absolute center title to save button space */
+  .navbar {
+    padding: 6px 10px !important;
+    height: 54px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+  }
+
+  .nav-title {
+    position: absolute !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    font-size: 9px !important;
+    opacity: 0.7;
+    white-space: nowrap;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .nav-left, .nav-right {
+    position: relative;
+    z-index: 2;
+    display: flex !important;
+    gap: 4px !important;
+  }
+
+  /* 2. Slim Pill Capsules */
+  .home-btn, 
+  .dropdown-btn, 
+  .profile-btn, 
+  .logout-btn, 
+  .admin-panel-btn {
+    padding: 5px 10px !important;
+    border-radius: 999px !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    height: 28px !important;
+    display: flex;
+    align-items: center;
+    background: rgba(15, 23, 42, 0.6) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    white-space: nowrap !important;
+  }
+
+  .logout-btn {
+    border-color: rgba(248, 113, 113, 0.5) !important;
+    color: #fca5a5 !important;
+  }
+
+  /* 3. Verification Card Mobile Fix */
+  .verify-wrapper {
+    margin-top: 80px !important;
+    padding: 0 15px;
+  }
+
+  .verify-card {
+    width: 100% !important;
+    max-width: 400px;
+    padding: 15px !important;
+  }
+
+  .header img { height: 50px !important; }
+  .header h2 { font-size: 18px !important; margin: 5px 0; }
+  .header h3 { font-size: 12px !important; }
+
+  /* 4. Form Scaling */
+  .form-box input[type=text] {
+    width: 100% !important; /* Full width on mobile */
+    margin-left: 0 !important; /* Fixes your 'otpInput' centering issue */
+    height: 40px;
+    font-size: 14px;
+  }
+
+  .captcha-box {
+    margin: 15px 0 !important;
+  }
+
+  .submit-btn {
+    padding: 12px !important;
+    font-size: 14px !important;
+  }
+}
+
+/* Fix for ultra-small phones */
+@media (max-width: 360px) {
+  .nav-title { display: none !important; }
+  .home-btn { padding: 5px 8px !important; }
+}
+/* --- LOCK VERIFICATION CARD TO CENTER --- */
+@media (max-width: 768px) {
+  /* Prevent the entire page from scrolling */
+  html, body {
+    overflow: hidden !important;
+    height: 100% !important;
+    position: fixed !important;
+    width: 100% !important;
+  }
+
+  /* Center the card exactly and lock it */
+  .verify-wrapper {
+    position: fixed !important;
+    inset: 0 !important;
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 10px !important;
+    z-index: 5;
+  }
+
+  .verify-card {
+    width: 92% !important; /* Slightly smaller to fit all phones */
+    max-height: 85vh; /* Prevents it from being too tall */
+    overflow-y: auto; /* Internal scroll ONLY if content is too long */
+    margin-top: 40px !important; /* Space for the fixed navbar */
+  }
+
+  /* Slim down the card header further to save space */
+  .header {
+    margin-bottom: 8px !important;
+  }
+  
+  .header h2 { font-size: 16px !important; }
+  .header h3 { font-size: 10px !important; }
+}   
     </style>
 </head>
 
@@ -456,4 +584,3 @@ profileBtn.onclick = () => {
 
 </body>
 </html>
-
