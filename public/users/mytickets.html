@@ -145,6 +145,81 @@
     color: #38bdf8;
     cursor: pointer;
   }
+  /* ---------- SLIM MOBILE TICKETS VIEW ---------- */
+@media (max-width: 768px) {
+  /* 1. Reset Body & Background */
+  body {
+    background: #020617 !important;
+  }
+  #bg-video, .overlay { display: none !important; }
+
+  /* 2. Slim Pill Navbar */
+  .navbar {
+    height: 50px !important;
+    padding: 0 10px !important;
+    position: fixed !important;
+    top: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important; /* Keep home button left */
+    gap: 10px !important;
+  }
+
+  .nav-left span { 
+    font-size: 13px !important; 
+    letter-spacing: 0.5px;
+    opacity: 0.9;
+  }
+
+  .home-btn {
+    height: 28px !important;
+    padding: 0 12px !important;
+    font-size: 11px !important;
+    border-radius: 999px !important;
+    display: flex;
+    align-items: center;
+  }
+
+  /* 3. Remove Top Gap */
+  .container {
+    margin-top: 65px !important; /* Just enough space for slim nav */
+    padding: 15px !important;
+    width: 100% !important;
+  }
+
+  h1 {
+    font-size: 20px !important;
+    margin-bottom: 15px !important;
+    text-align: left !important; /* More modern mobile look */
+    padding-left: 5px;
+  }
+
+  /* 4. Slim Ticket Cards */
+  .ticket {
+    padding: 12px !important;
+    border-radius: 12px !important;
+    margin-bottom: 10px !important;
+    background: rgba(30, 41, 59, 0.7) !important; /* Slightly lighter for contrast */
+    border: 1px solid rgba(56, 189, 248, 0.3) !important;
+  }
+
+  .ticket p {
+    font-size: 12px !important;
+    margin: 3px 0 !important;
+  }
+
+  .route-btn {
+    width: 100% !important; /* Full width button is easier to tap */
+    height: 38px !important;
+    font-size: 13px !important;
+    margin-top: 12px !important;
+  }
+
+  .back-btn {
+    width: 90% !important;
+    font-size: 13px !important;
+  }
+}
 </style>
 
 <script src="/js/auth.js"></script>
@@ -226,4 +301,3 @@ loadTickets();
 
 </body>
 </html>
-
