@@ -217,6 +217,92 @@
       font-weight: bold;
       text-decoration: none;
     }
+    /* ---------- REGISTER PAGE MOBILE OPTIMIZATION ---------- */
+
+@media (max-width: 768px) {
+  /* 1. Navbar Setup */
+  .navbar {
+    height: 60px !important;
+    padding: 0 15px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+  }
+
+  /* 2. THE TITLE: Locked to Absolute Center (No overlapping) */
+  .nav-left span {
+    position: absolute !important;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: auto !important;
+    margin: 0 !important;
+    font-size: 12px !important;
+    font-weight: 800 !important;
+    white-space: nowrap !important;
+    text-transform: uppercase;
+    z-index: 1 !important;
+    pointer-events: none;
+    display: block !important;
+  }
+
+  /* 3. HOME BUTTON: Left Aligned Small Capsule */
+  .home-btn {
+    display: inline-block !important;
+    position: relative !important;
+    z-index: 10 !important;
+    
+    padding: 5px 10px !important; 
+    font-size: 10px !important;
+    background: rgba(15, 23, 42, 0.2) !important;
+    border: 1px solid rgba(248, 250, 252, 0.6) !important;
+    border-radius: 999px !important;
+    color: #f9fafb !important;
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
+  }
+
+  /* 4. REGISTER CARD: Decreased Size */
+  .box {
+    width: 85% !important; /* Smaller width like login */
+    max-width: 300px !important;
+    padding: 18px !important;
+    margin-top: 20px;
+  }
+
+  .box h2 {
+    font-size: 1.1rem !important;
+    margin-bottom: 8px !important;
+  }
+
+  input {
+    padding: 8px !important;
+    font-size: 16px !important; /* Proper zoom on mobile */
+    margin-top: 8px !important;
+  }
+
+  button[type="submit"] {
+    padding: 8px !important;
+    font-size: 13px !important;
+    margin-top: 12px !important;
+  }
+
+  .text {
+    font-size: 11px !important;
+  }
+
+  /* 5. Hide everything else in nav */
+  .nav-right, 
+  .nav-buttons, 
+  .nav-right button {
+    display: none !important;
+  }
+
+  /* 6. Spacing */
+  .wrapper {
+    padding-top: 70px !important;
+  }
+}
   </style>
 </head>
 
@@ -324,4 +410,3 @@
 
 </body>
 </html>
-
