@@ -245,6 +245,99 @@
     }
 
     .muted { color:#9ca3af; font-size:13px; }
+    /* ---------- CENTERED NAV TITLE & COMPACT CARDS ---------- */
+
+.navbar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    height: 50px;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-sizing: border-box;
+    z-index: 10;
+}
+
+/* Mobile Specific Fixes */
+@media (max-width: 480px) {
+    .navbar {
+        height: 48px;
+        padding: 0 10px;
+        position: relative; /* Context for absolute centering */
+    }
+
+    /* Keep the button on the left */
+    .nav-left {
+        z-index: 2;
+    }
+
+    /* FIX: Absolute centering for the title */
+    .nav-left span {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 12px;       /* Slightly smaller to ensure fit */
+        font-weight: bold;
+        white-space: nowrap;
+        text-align: center;
+        width: auto;
+        pointer-events: none; /* Allows clicks to pass through if overlapping */
+    }
+
+    /* Keep logout on the right */
+    .nav-right {
+        z-index: 2;
+    }
+
+    .home-btn, .nav-right button {
+        padding: 5px 8px;
+        font-size: 10px;
+        white-space: nowrap;
+    }
+
+    .nav-right button {
+        margin-right: 0;
+    }
+
+    /* Center the cards in the main area */
+ /* Adjust wrapper for smaller nav */
+    .wrapper {
+        padding: 65px 10px 20px; 
+        gap: 8px;
+    }
+
+    /* Compact Card Size */
+    .phase {
+        width: 320px; /* Slightly wider to feel more balanced */
+        max-width: 95%;
+        padding: 12px;
+        gap: 10px;
+        border-radius: 12px;
+    }
+
+    h3 {
+        font-size: 16px;
+        margin: 0 0 4px 0;
+    }
+
+    /* Shrink form elements for better fit */
+    select, input, button {
+        padding: 8px;
+        font-size: 13px;
+    }
+
+    .scanner-box {
+        height: 260px; 
+    }
+
+    .ticket-box {
+        padding: 10px;
+    }
+}
+
   </style>
 </head>
 <body>
@@ -254,9 +347,6 @@
   <div class="nav-left">
     <button class="home-btn" onclick="location.href='/conductor/dashboard.html'">⬅ Dashboard</button>
     <span>Conductor Scanner</span>
-  </div>
-  <div class="nav-right">
-    <button onclick="logout()">Logout</button>
   </div>
 </div>
 
@@ -423,17 +513,30 @@ updateTrackingUI();
 /* ---------- Camera & scanner ---------- */
 async function startCamera() {
   if (stream) return;
+
+  // 🔴 ISSUE 1 FIX — camera support check
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    setFlash("Camera not supported on this device.", "error", 6000);
+    scanStatus.textContent = "❌ Camera not supported";
+    return;
+  }
+
   try {
-    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "environment" }
+    });
+
     video.srcObject = stream;
     scanStatus.textContent = "📷 Point camera at QR...";
     startAutoScan();
+
   } catch (e) {
     console.error("Camera error:", e);
-    setFlash("Camera access denied or unavailable.", "error", 6000);
+    setFlash("Camera permission denied or unavailable.", "error", 6000);
     scanStatus.textContent = "❌ Camera error";
   }
 }
+
 
 function stopCamera() {
   if (scanInterval) { clearInterval(scanInterval); scanInterval = null; }
@@ -765,6 +868,10 @@ window.addEventListener("beforeunload", () => {
   stopCamera();
   if (autoTrackInterval) clearInterval(autoTrackInterval);
 });
+// 🔴 ISSUE 2 FIX — stop camera when leaving page
+window.addEventListener("pagehide", stopCamera);
+window.addEventListener("beforeunload", stopCamera);
+
 </script>
 
 </body>
