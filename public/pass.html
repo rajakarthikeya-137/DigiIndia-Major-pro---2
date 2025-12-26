@@ -237,6 +237,116 @@
     }
     .btn:hover { background: #0056b3; }
     .note { font-size: 12px; margin-top: 5px; color: #e5e7eb; }
+    /* ---------- MOBILE OPTIMIZATION (CAPSULES & SCALING) ---------- */
+@media (max-width: 768px) {
+  /* 1. Navbar: Absolute center title & Pill Capsules */
+  .navbar {
+    padding: 6px 10px !important;
+    height: 54px !important;
+  }
+
+  .nav-title {
+    position: absolute !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    font-size: 10px !important;
+    opacity: 0.8;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  .home-btn, .profile-btn, .logout-btn, .admin-panel-btn {
+    padding: 5px 12px !important;
+    border-radius: 999px !important; /* Capsule Shape */
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    height: 28px !important;
+    display: flex;
+    align-items: center;
+    background: rgba(15, 23, 42, 0.6) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  }
+
+  /* 2. Card Container: Vertical Spacing */
+  body {
+    padding: 10px !important; /* Reduce body padding */
+  }
+
+  .card-container {
+    margin-top: 70px !important; /* Less space needed for slim nav */
+    gap: 15px !important;
+    width: 100% !important;
+    align-items: center;
+  }
+
+  /* 3. The Card: Scale Down to fit screen */
+  .card {
+    width: 95vw !important; /* Use viewport width */
+    height: auto !important; /* Let content determine height or use aspect ratio */
+    min-height: 220px !important;
+    padding: 15px !important;
+    border-radius: 15px !important;
+  }
+
+  /* 4. Details scaling */
+  .header { gap: 8px !important; }
+  .heading-logo { width: 30px !important; height: 30px !important; }
+  .heading-text h2 { font-size: 11px !important; }
+  .heading-text .pass-title { font-size: 10px !important; }
+
+  .photo-info {
+    margin-top: 40px !important; /* Bring content up */
+    gap: 10px !important;
+  }
+
+  .photo {
+    width: 70px !important;
+    height: 70px !important;
+  }
+
+  .details { font-size: 10px !important; }
+  .details p { margin: 2px 0 !important; }
+
+  .qr {
+    width: 60px !important;
+    height: 60px !important;
+    bottom: 45px !important;
+    right: 15px !important;
+  }
+
+  .valid-till {
+    bottom: 15px !important;
+    right: 15px !important;
+    font-size: 9px !important;
+  }
+
+  /* 5. Front Card Text Scaling */
+  #frontCard {
+    padding: 15px !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .text-center { font-size: 10px !important; line-height: 1.3; }
+  .info { position: static !important; margin-top: 15px; font-size: 9px !important; }
+  .footer { position: static !important; margin-top: 10px; font-size: 9px !important; }
+
+  /* 6. Buttons */
+  .actions {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: 0 10px;
+  }
+
+  .btn {
+    width: 100% !important;
+    margin: 5px 0 !important;
+    padding: 12px !important;
+    font-size: 14px !important;
+  }
+}
   </style>
 </head>
 
@@ -404,4 +514,3 @@ document.getElementById("downloadPdfBtn").onclick = async () => {
 
 </body>
 </html>
-
