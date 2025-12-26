@@ -4,407 +4,236 @@
   <meta charset="UTF-8">
   <title>Conductor Login - MahaLakshmi Portal</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <style>
-    /* ===============================
-   ANDROID FULL HEIGHT FIX
-   =============================== */
-html, body {
-  height: 100%;
+    :root {
+  --primary: #0d9488;
+  --secondary: #6366f1;
+  --card-bg: rgba(15,23,42,0.96);
 }
 
+* { box-sizing: border-box; }
+
 body {
+  margin: 0;
+  font-family: Arial, sans-serif;
   min-height: 100vh;
-  background-color: #0f172a;
+  min-height: 100svh; /* Better for mobile browsers */
+  background: radial-gradient(circle at top, #0f172a, #020617);
+  color: #e5e7eb;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 #bg-video {
-  min-height: 100vh;
-  width: 100vw;
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
+  z-index: -2;
 }
 
 .overlay {
-  min-height: 100vh;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: -1;
 }
 
-    :root {
-      --primary: #0d9488;
-      --secondary: #6366f1;
-      --card-bg: rgba(15,23,42,0.96);
-    }
+/* NAVBAR */
+.navbar {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%;
+  padding: 12px 22px;
+  background: linear-gradient(90deg, #0f766e, #4f46e5, #f97316);
+  background-size: 200% 200%;
+  animation: navMove 14s ease-in-out infinite;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.75);
+}
 
-    * { box-sizing: border-box; }
+@keyframes navMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
 
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      min-height: 100vh;
-      background: radial-gradient(circle at top, #0f172a, #020617);
-      color: #e5e7eb;
-      overflow-x: hidden;
-    }
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #f9fafb;
+  font-weight: bold;
+  font-size: 18px;
+}
 
-    #bg-video {
-      position: fixed;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      z-index: -2;
-    }
+.home-btn {
+  padding: 7px 14px;
+  background: rgba(15,23,42,0.2);
+  border: 1px solid rgba(248,250,252,0.7);
+  border-radius: 999px;
+  color: #f9fafb;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  backdrop-filter: blur(6px);
+  transition: 0.15s ease;
+}
 
-    .overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.55);
-      z-index: -1;
-    }
+.nav-right button {
+  margin-left: 8px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(248,250,252,0.7);
+  background: rgba(15,23,42,0.2);
+  color: #f9fafb;
+  cursor: pointer;
+  font-size: 13px;
+  backdrop-filter: blur(6px);
+}
 
+/* WRAPPER - This handles the centering */
+.wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;     /* Vertical Center */
+  justify-content: center;   /* Horizontal Center */
+  padding-top: 60px;         /* Prevents navbar overlap */
+  z-index: 1;
+}
+
+/* THE BOX - Compact Version */
+.box {
+  position: relative;
+  width: 300px; 
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.8);
+  overflow: hidden;
+}
+
+.box::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: conic-gradient(from 180deg, #38bdf8, #818cf8, #f97316, #38bdf8);
+  animation: spin 10s linear infinite;
+  z-index: -1;
+}
+
+.box::after {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border-radius: inherit;
+  background: var(--card-bg);
+  z-index: -1;
+}
+
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
+h2 {
+  text-align: center;
+  margin: 0 0 12px;
+  font-size: 1.25rem;
+  color: #f9fafb;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #4b5563;
+  margin-top: 10px;
+  background: #020617;
+  color: #f9fafb;
+  font-size: 14px;
+}
+
+button[type="submit"] {
+  width: 100%;
+  margin-top: 16px;
+  padding: 10px;
+  background: linear-gradient(120deg, var(--primary), var(--secondary));
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  color: white;
+  text-transform: uppercase;
+}
+
+#message { text-align: center; margin-top: 10px; font-size: 13px; }
+
+.text { margin-top: 12px; text-align: center; font-size: 12px; }
+.text a { color: #38bdf8; font-weight: bold; text-decoration: none; }
+
+/* ---------- REFINED CENTERED MOBILE NAV ---------- */
+
+@media (max-width: 768px) {
     .navbar {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%;
-      padding: 12px 22px;
-      background: linear-gradient(90deg, #0f766e, #4f46e5, #f97316);
-      background-size: 200% 200%;
-      animation: navMove 14s ease-in-out infinite;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      z-index: 10;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.75);
+        height: 50px;
+        padding: 0; /* Remove padding to allow full-width centering */
+        display: flex;
+        align-items: center;
+        justify-content: center; /* Centers the content */
+        position: relative;
     }
 
-    @keyframes navMove {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-
-    .nav-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      color: #f9fafb;
-      font-weight: bold;
-      font-size: 18px;
-    }
-
+    /* 1. Remove the Home button container completely */
     .home-btn {
-      padding: 7px 14px;
-      background: rgba(15,23,42,0.2);
-      border: 1px solid rgba(248,250,252,0.7);
-      border-radius: 999px;
-      color: #f9fafb;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 500;
-      backdrop-filter: blur(6px);
-      transition: 0.15s ease;
+        display: none !important;
     }
 
-    .home-btn:hover {
-      background: #f9fafb;
-      color: #0f172a;
-      transform: translateY(-1px);
-      box-shadow: 0 6px 18px rgba(15,23,42,0.9);
+    /* 2. Force the title to the absolute center of the viewport */
+    .nav-left {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        margin: 0;
     }
 
-    .nav-right button {
-      margin-left: 8px;
-      padding: 7px 14px;
-      border-radius: 999px;
-      border: 1px solid rgba(248,250,252,0.7);
-      background: rgba(15,23,42,0.2);
-      color: #f9fafb;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 500;
-      transition: 0.15s ease;
-      backdrop-filter: blur(6px);
+    .nav-left span {
+        font-size: 14px;
+        font-weight: bold;
+        white-space: nowrap;
+        text-align: center;
+        color: #ffffff;
+        letter-spacing: 0.3px;
     }
 
-    .nav-right button:hover {
-      background: #f9fafb;
-      color: #0f172a;
-      transform: translateY(-1px);
-      box-shadow: 0 6px 18px rgba(15,23,42,0.9);
+    /* 3. Hide all login buttons on the right to keep the center clean */
+    .nav-right {
+        display: none !important;
     }
 
+    /* 4. Ensure the login box remains centered and compact */
     .wrapper {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding-top: 90px;
+        padding-top: 50px; /* Aligned with nav height */
     }
 
     .box {
-      position: relative;
-      width: 360px;
-      padding: 24px 22px 22px;
-      border-radius: 18px;
-      box-shadow: 0 18px 40px rgba(0,0,0,0.8);
-      overflow: hidden;
-    }
-
-    .box::before {
-      content: "";
-      position: absolute;
-      inset: -2px;
-      border-radius: inherit;
-      background: conic-gradient(from 180deg,
-        rgba(56,189,248,0.7),
-        rgba(129,140,248,0.9),
-        rgba(249,115,22,0.8),
-        rgba(56,189,248,0.7)
-      );
-      animation: spin 10s linear infinite;
-      z-index: -1;
-    }
-
-    .box::after {
-      content: "";
-      position: absolute;
-      inset: 2px;
-      border-radius: inherit;
-      background: var(--card-bg);
-      z-index: -1;
-    }
-
-    @keyframes spin {
-      100% { transform: rotate(360deg); }
+        width: 290px;
+        max-width: 90%;
+        padding: 15px;
     }
 
     h2 {
-      text-align: center;
-      margin-bottom: 12px;
-      color: #f9fafb;
+        font-size: 1.1rem;
+        margin-bottom: 10px;
     }
-
-    input {
-      width: 100%;
-      padding: 10px;
-      border-radius: 10px;
-      border: 1px solid #4b5563;
-      margin-top: 10px;
-      background: #020617;
-      color: #f9fafb;
-      font-size: 14px;
-    }
-
-    input:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 2px rgba(45,212,191,0.4);
-    }
-
-    button[type="submit"] {
-      width: 100%;
-      margin-top: 16px;
-      padding: 10px;
-      background: linear-gradient(120deg, var(--primary), var(--secondary));
-      border: none;
-      border-radius: 999px;
-      cursor: pointer;
-      font-size: 15px;
-      font-weight: bold;
-      color: white;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      box-shadow: 0 12px 26px rgba(15,23,42,0.85);
-    }
-
-    button[type="submit"]:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 16px 36px rgba(15,23,42,0.9);
-    }
-
-    #message {
-      text-align: center;
-      margin-top: 10px;
-      font-size: 13px;
-      color: #f97316;
-    }
-
-    .text {
-      margin-top: 8px;
-      text-align: center;
-      font-size: 13px;
-    }
-
-    .text a {
-      color: #38bdf8;
-      font-weight: bold;
-      text-decoration: none;
-    }
-    /* =====================================================
-   MOBILE-FIRST MEDIA QUERIES
-   Target: Android phones & up
-   ===================================================== */
-
-/* -----------------------------------------------------
-   SMALL AND NORMAL MOBILE PHONES (≤ 360px)
-   ----------------------------------------------------- */
-@media (max-width: 360px) {
-
-  .navbar {
-    padding: 10px 14px;
-  }
-
-  .nav-left span {
-    font-size: 14px;
-  }
-
-  .nav-right button {
-    padding: 6px 10px;
-    font-size: 11px;
-  }
-
-  .box {
-    width: 92%;
-    padding: 20px 16px;
-  }
-
-  h2 {
-    font-size: 18px;
-  }
-
-  input {
-    font-size: 16px; /* prevent Android zoom */
-  }
 }
-
-/* -----------------------------------------------------
-   STANDARD ANDROID PHONES (361px – 430px)
-   ----------------------------------------------------- */
-@media (min-width: 361px) and (max-width: 430px) {
-
-  .navbar {
-    padding: 12px 16px;
-  }
-
-  .nav-left span {
-    font-size: 15px;
-  }
-
-  .nav-right button {
-    font-size: 12px;
-    padding: 7px 12px;
-  }
-
-  .box {
-    width: 340px;
-  }
-
-  input {
-    font-size: 16px; /* critical for Android */
-  }
-}
-
-/* -----------------------------------------------------
-   LARGE PHONES / SMALL TABLETS (431px – 767px)
-   ----------------------------------------------------- */
-@media (min-width: 431px) and (max-width: 767px) {
-
-  .box {
-    width: 380px;
-  }
-
-  .nav-left span {
-    font-size: 16px;
-  }
-
-  .nav-right button {
-    font-size: 13px;
-  }
-}
-
-
-/* =====================================================
-   PROFESSIONAL MOBILE NAVBAR (LOGIN PAGE)
-   ===================================================== */
-@media (max-width: 430px) {
-
-  /* Compact app-style header */
-  .navbar {
-    height: 56px;
-    padding: 0 14px;
-    flex-direction: row;
-    justify-content: center;
-  }
-
-  /* Center title */
-  .nav-left {
-    gap: 8px;
-    font-size: 15px;
-  }
-
-  .nav-left span {
-    font-size: 15px;
-    white-space: nowrap;
-  }
-
-  /* Keep home, hide clutter */
-  .nav-right {
-    display: none;
-  }
-
-  /* Optional: keep home button smaller */
-  .home-btn {
-    padding: 6px 10px;
-    font-size: 12px;
-  }
-
-  /* Fix layout spacing */
-  .wrapper {
-    padding-top: 90px;
-  }
-}
-
-
-
-/* -----------------------------------------------------
-   TABLETS (≥ 768px)
-   ----------------------------------------------------- */
-@media (min-width: 768px) {
-
-  .wrapper {
-    padding-top: 120px;
-  }
-
-  .box {
-    width: 420px;
-  }
-
-  h2 {
-    font-size: 22px;
-  }
-
-  input {
-    font-size: 15px;
-  }
-}
-
-/* -----------------------------------------------------
-   DESKTOP / LAPTOP (≥ 1024px)
-   ----------------------------------------------------- */
-@media (min-width: 1024px) {
-
-  .navbar {
-    padding: 14px 36px;
-  }
-
-  .nav-left span {
-    font-size: 18px;
-  }
-
-  .box {
-    width: 440px;
-  }
-}
-
   </style>
 </head>
 
@@ -438,6 +267,20 @@ body {
       <input type="password" id="password" placeholder="Password" required>
 
       <button type="submit">Login</button>
+
+      <button type="button" id="gpsBtn" style="
+        width:100%;
+        margin-top:10px;
+        padding:10px;
+        border-radius:999px;
+        border:1px solid #38bdf8;
+        background:transparent;
+        color:#38bdf8;
+        font-weight:bold;
+      ">
+      📍 Enable GPS & Continue
+      </button>
+
       <p id="message"></p>
 
       <div class="text">
@@ -449,11 +292,15 @@ body {
 </div>
 
 <script>
+let loginSuccess = false;
+
+/* ---------------- LOGIN HANDLER ---------------- */
 document.getElementById("loginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const msg = document.getElementById("message");
-  msg.textContent = "";
+  msg.style.color = "#38bdf8";
+  msg.textContent = "Logging in...";
 
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
@@ -466,46 +313,81 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
     });
 
     const data = await res.json();
+
     if (!data.success) {
       msg.style.color = "#f97316";
       msg.textContent = data.msg || "Login failed";
       return;
     }
 
-    // store token
+    // ✅ Login success
     localStorage.setItem("conductorToken", data.token);
+    loginSuccess = true;
 
-    // Ask for geolocation permission immediately and store trackingEnabled
-    msg.style.color = "#38bdf8";
-    msg.textContent = "Requesting GPS permission...";
-
-    // Try to get current position to trigger permission popup
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        // Allowed
-        localStorage.setItem("trackingEnabled", "true");
-        msg.style.color = "#22c55e";
-        msg.textContent = "GPS Enabled ✔ Redirecting...";
-        setTimeout(() => {
-          location.href = "/conductor/dashboard.html";
-        }, 700);
-      },
-      (err) => {
-        // Denied or error
-        localStorage.setItem("trackingEnabled", "false");
-        msg.style.color = "#f97316";
-        msg.textContent = "GPS Denied or unavailable. Redirecting...";
-        setTimeout(() => {
-          location.href = "/conductor/dashboard.html";
-        }, 700);
-      },
-      { enableHighAccuracy: true, timeout: 8000 }
-    );
+    msg.style.color = "#22c55e";
+    msg.textContent = "Login successful. Tap below to enable GPS.";
 
   } catch (err) {
     msg.style.color = "#f97316";
     msg.textContent = "Server error. Try again.";
   }
+});
+
+/* ---------------- GPS BUTTON (USER ACTION) ---------------- */
+document.getElementById("gpsBtn").addEventListener("click", () => {
+  const msg = document.getElementById("message");
+
+  if (!loginSuccess) {
+    msg.style.color = "#f97316";
+    msg.textContent = "Please login first";
+    return;
+  }
+
+  if (!navigator.geolocation) {
+    localStorage.setItem("trackingEnabled", "false");
+    msg.style.color = "#f97316";
+    msg.textContent = "GPS not supported. Redirecting...";
+    setTimeout(() => {
+      location.href = "/conductor/dashboard.html";
+    }, 800);
+    return;
+  }
+
+  msg.style.color = "#38bdf8";
+  msg.textContent = "Requesting GPS permission...";
+
+  navigator.geolocation.getCurrentPosition(
+    () => {
+      // ✅ GPS allowed
+      localStorage.setItem("trackingEnabled", "true");
+      msg.style.color = "#22c55e";
+      msg.textContent = "GPS Enabled ✔ Redirecting...";
+      setTimeout(() => {
+        location.href = "/conductor/dashboard.html";
+      }, 800);
+    },
+    (err) => {
+      // ❌ GPS denied / unavailable
+      localStorage.setItem("trackingEnabled", "false");
+
+      if (err.code === err.PERMISSION_DENIED) {
+        msg.textContent = "GPS denied. Enable it from browser settings.";
+      } else {
+        msg.textContent = "GPS unavailable.";
+      }
+
+      msg.style.color = "#f97316";
+
+      setTimeout(() => {
+        location.href = "/conductor/dashboard.html";
+      }, 1200);
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0
+    }
+  );
 });
 </script>
 
