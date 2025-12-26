@@ -212,7 +212,88 @@
     tr:hover {
       background: rgba(30,41,59,0.65);
     }
+    /* =========================================
+   FIXED NAVBAR & CENTERING QUERIES
+   ========================================= */
 
+/* 1. Desktop: Keep box centered */
+@media (min-width: 1024px) {
+  .wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; 
+    min-height: calc(100vh - 60px);
+  }
+}
+
+/* 2. Tablet: Handle 4 buttons + Welcome Label */
+@media (max-width: 992px) {
+  .navbar {
+    flex-wrap: wrap;
+    height: auto;
+    padding: 10px 15px;
+  }
+  
+  .nav-right {
+    gap: 8px;
+  }
+
+  .nav-right button {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+}
+
+/* 3. Mobile: Stack Navbar and Table Scroll */
+@media (max-width: 768px) {
+  .home-btn {
+    display: none; /* Removed Home button as requested */
+  }
+
+  .navbar {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 15px 10px;
+  }
+
+  .nav-right {
+    display: grid; 
+    grid-template-columns: repeat(2, 1fr); /* 2x2 grid for Scanner, Check, Counter, Logout */
+    width: 100%;
+    gap: 8px;
+  }
+
+  .nav-right span#welcomeLabel {
+    grid-column: span 2;
+    text-align: center;
+    font-size: 12px;
+  }
+
+  .wrapper {
+    padding: 160px 10px 20px; /* Adjust padding for stacked nav */
+  }
+
+  .card {
+    width: 100%;
+    padding: 15px;
+    overflow: hidden; 
+  }
+
+  table {
+    display: block;
+    overflow-x: auto; 
+    width: 100%;
+    white-space: nowrap;
+  }
+}
+
+/* 4. Small Mobile: Clean up text */
+@media (max-width: 480px) {
+  .nav-left span {
+    font-size: 16px;
+  }
+}
   </style>
 </head>
 <body>
