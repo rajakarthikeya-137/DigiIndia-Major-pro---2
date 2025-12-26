@@ -235,6 +235,115 @@
 
   /* Original minimal styles preserved for compatibility */
   header { display:none; }
+  /* ---------- REFINED CENTERED MOBILE NAV (CENTERED TITLE + SMALL DASHBOARD) ---------- */
+
+@media (max-width: 768px) {
+  /* 1. Navbar Adjustments */
+  .navbar {
+    padding: 0 10px;
+    height: 50px;
+    display: flex;
+    justify-content: flex-end; /* Pushes the dashboard button to the right */
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    z-index: 100;
+  }
+
+  /* 2. Hide only the Home Button */
+  .home-btn {
+    display: none !important;
+  }
+
+  /* 3. Absolute Centering for Title (Unchanged) */
+  .nav-left {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%); 
+    width: auto;
+    margin: 0;
+    pointer-events: none;
+  }
+
+  .nav-left span {
+    font-size: 14px;
+    font-weight: bold;
+    white-space: nowrap;
+    text-align: center;
+    color: #ffffff;
+    letter-spacing: 0.3px;
+  }
+
+  /* 4. Small Dashboard Button (Restored to its place) */
+  .nav-right {
+    display: flex !important; /* Re-enabled */
+    align-items: center;
+    z-index: 2;
+  }
+
+  .nav-right button {
+    padding: 4px 8px; /* Significantly smaller padding */
+    font-size: 10px;    /* Decreased font size */
+    margin: 0;
+    white-space: nowrap;
+  }
+
+  /* 5. Layout Scaling (Unchanged from your perfect version) */
+  .wrapper {
+    padding-top: 70px; 
+    padding-bottom: 20px;
+  }
+
+  .big-box {
+    width: 95%;
+    margin: 0 auto;
+    padding: 12px;
+  }
+
+  h2 {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+  }
+
+  .content-row {
+    flex-direction: column; 
+    gap: 10px;
+  }
+
+  .video-wrap {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+
+  .stats-panel {
+    flex: 1 1 auto;
+    width: 100%;
+    padding: 12px;
+    display: grid;
+    grid-template-columns: 1fr 1fr; 
+    gap: 10px;
+  }
+
+  .big-num {
+    font-size: 24px;
+  }
+
+  .stats-panel > div {
+    font-size: 12px;
+  }
+
+  .btn {
+    padding: 12px;
+    font-size: 14px;
+    grid-column: span 2; 
+  }
+
+  .note, .legend {
+    grid-column: span 2;
+    font-size: 10px;
+  }
+}
 </style>
 </head>
 <body>
@@ -253,7 +362,7 @@
   </div>
 
   <div class="nav-right">
-    <button onclick="location.href='/conductor/dashboard.html'">Conductor Dashboard</button>
+    <button onclick="location.href='/conductor/dashboard.html'">Dashboard</button>
   </div>
 </div>
 
@@ -883,4 +992,3 @@ loadModel();
 
 </body>
 </html>
-
