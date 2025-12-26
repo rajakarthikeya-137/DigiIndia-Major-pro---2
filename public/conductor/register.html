@@ -222,6 +222,123 @@
       font-weight: bold;
       text-decoration: none;
     }
+    /* --- DEFAULT STYLES (Compact Registration Box) --- */
+.box {
+  position: relative;
+  width: 300px;
+  padding: 18px 20px;
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.85);
+  overflow: hidden;
+  z-index: 1;
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 8px;
+  font-size: 1.2rem;
+  color: #f9fafb;
+}
+
+input {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #4b5563;
+  margin-top: 8px;
+  background: #020617;
+  color: #f9fafb;
+  font-size: 13px;
+}
+
+button[type="submit"] {
+  width: 100%;
+  margin-top: 14px;
+  padding: 10px;
+  font-size: 13px;
+  border-radius: 999px;
+  background: linear-gradient(120deg, var(--primary), var(--secondary));
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  color: white;
+  text-transform: uppercase;
+}
+
+.text {
+  margin-top: 10px;
+  font-size: 11px;
+  text-align: center;
+}
+/* --- PREVENT SCROLLING & FIX LAYOUT --- */
+
+html, body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden; /* Disables all scrolling */
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+.wrapper {
+  height: 100vh; /* Takes full viewport height */
+  width: 100vw;
+  display: flex;
+  align-items: center;   /* Vertical Center */
+  justify-content: center; /* Horizontal Center */
+  padding-top: 50px;     /* Accounts for Navbar */
+  box-sizing: border-box;
+}
+
+/* --- REFINED MOBILE NAV (FIXED & CENTERED) --- */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 0 10px;
+    height: 50px;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center; /* Centers items flex-wise */
+    align-items: center;
+    z-index: 10;
+  }
+
+  .home-btn, .nav-right {
+    display: none !important; /* Removes side clutter */
+  }
+
+  .nav-left {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
+  }
+
+  .nav-left span {
+    font-size: 14px;
+    font-weight: bold;
+    white-space: nowrap;
+    color: #ffffff;
+  }
+
+  .box {
+    width: 290px;
+    max-width: 90%;
+    padding: 18px;
+    /* Ensure the box fits on small screens without scrolling */
+    margin: auto; 
+  }
+
+  input {
+    padding: 8px; /* Slightly more compact */
+    font-size: 16px; 
+  }
+}
   </style>
 </head>
 <body>
