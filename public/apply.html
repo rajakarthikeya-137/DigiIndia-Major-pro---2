@@ -387,6 +387,73 @@
     @media (max-width: 480px) {
       .nav-title { display: none; }
     }
+    /* --- FIXED CAPSULE NAV: PREVENT OVERFLOW --- */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 0 8px !important;
+    height: 55px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+  }
+
+  /* 1. Center the title behind the buttons to save horizontal space */
+  .nav-title {
+    position: absolute !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    font-size: 9px !important;
+    opacity: 0.6;
+    z-index: 1;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  /* 2. Slim down the left and right containers */
+  .nav-left, .nav-right {
+    position: relative;
+    z-index: 2;
+    display: flex !important;
+    gap: 4px !important;
+  }
+
+  /* 3. The Pill Capsules - Super Slim */
+  .home-btn, 
+  .dropdown-btn, 
+  .profile-btn, 
+  .logout-btn, 
+  .admin-panel-btn {
+    padding: 5px 10px !important; /* Narrow padding */
+    border-radius: 999px !important; 
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    height: 28px !important; /* Fixed height for consistency */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(15, 23, 42, 0.6) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    white-space: nowrap !important;
+  }
+
+  /* 4. Special Red Capsule for Logout to make it stand out */
+  .logout-btn {
+    border-color: rgba(248, 113, 113, 0.6) !important;
+    color: #fca5a5 !important;
+    background: rgba(153, 27, 27, 0.4) !important;
+  }
+
+  /* 5. Shrink dropdown content for mobile so it fits the small capsules */
+  .dropdown-content {
+    min-width: 120px !important;
+  }
+}
+
+/* For very narrow phones (e.g. iPhone SE) */
+@media (max-width: 360px) {
+  .nav-title { display: none !important; } /* Remove title to save buttons */
+  .home-btn { padding: 5px 8px !important; }
+}
   </style>
 </head>
 
@@ -662,7 +729,6 @@ setupRoleNavbar();
 
 </body>
 </html>
-
 
 
 
